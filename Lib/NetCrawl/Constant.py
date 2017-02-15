@@ -8,6 +8,3 @@ Default_Header = {
 Login_Url = ""
 Captcha_Url = ""
 
-
-Url = "http://www.mouser.cn/"
-Pre_Url = "https://industrial.panasonic.cn"

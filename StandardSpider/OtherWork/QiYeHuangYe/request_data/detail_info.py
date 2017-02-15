@@ -9,12 +9,13 @@ from pymongo import MongoClient
 
 from Lib.Currency.ThreadingPool import ThreadingPool
 from Lib.NetCrawl.Proxy_Pool import ProxyPool
-from OtherWork.QiYeHuangYe.request_data.Constant import TianYan_Detail_Headers, TianYan_Detail_Cookies
+from StandardSpider.OtherWork.QiYeHuangYe.request_data.Constant import TianYan_Detail_Headers, TianYan_Detail_Cookies
 
 
 class DetailInfo:
     def __init__(self):
         self.proxy_pool = ProxyPool()
+
         self.proxy_ip = self.proxy_pool.get()
 
     def get_detail(self, url):
@@ -23,12 +24,20 @@ class DetailInfo:
             my_headers = TianYan_Detail_Headers
             my_headers["Referer"] = url
             my_session.headers.update(TianYan_Detail_Headers)
-            my_session.proxies.update(self.proxy_ip)
+            try:
+                my_session.proxies.update(self.proxy_ip)
+            except Exception as e:
+                print(e)
+                time.sleep(1)
+                self.proxy_pool.remove(self.proxy_ip)
+                self.proxy_ip = self.proxy_pool.get()
+                continue
 
             try:
                 first_res = my_session.get(url.replace("company", "tongji") + ".json?random=" + str(
-                    round(time.time(), 3)).replace(".", ""))
+                    round(time.time(), 3)).replace(".", ""), timeout=15)
                 first_content = first_res.content
+                first_data_v = eval(first_content)["data"]["v"]
             except Exception as e:
                 print(e)
                 self.proxy_pool.remove(self.proxy_ip)
@@ -39,7 +48,6 @@ class DetailInfo:
                 self.proxy_pool.remove(self.proxy_ip)
                 self.proxy_ip = self.proxy_pool.get()
                 continue
-            first_data_v = eval(first_content)["data"]["v"]
             first_token = re.match(r".*?token=(.*?);.*?", str(bytes(eval(first_data_v)))).group(1)
             another = re.match(r".*?\{return'(.*?)'", str(bytes(eval(first_data_v)))).group(1)
 
@@ -63,7 +71,7 @@ class DetailInfo:
             my_session.headers.update(my_headers)
 
             try:
-                real_res = my_session.get(url + ".json")
+                real_res = my_session.get(url + ".json", timeout=15)
 
                 content = real_res.content.decode()
             except Exception as e:
@@ -80,12 +88,12 @@ class DetailInfo:
         conn = MongoClient()
         json_list = json.loads(content)
         brief_companies = json_list["data"]
-        col = conn.spider.Company_Info
+        col = conn.spider.All_Company_Info
         if not brief_companies:
             print(url, "无数据")
-            col.update({"url": url}, {'$set': {"状态": "无数据"}}, multi=True)
+            col.update({"url": url}, {'$set': {"状态": "无数据"}})
         else:
-            col.update({"url": url}, {'$set': {"data": brief_companies, "状态": "已完成"}}, multi=True)
+            col.update({"url": url}, {'$set': {"data": brief_companies, "状态": "已完成"}})
             print(url, "已完成")
         conn.close()
 
@@ -95,14 +103,15 @@ class DetailInfo:
 if __name__ == "__main__":
     socket.setdefaulttimeout(30)
     mongo_conn = MongoClient()
-    col = mongo_conn.spider.Company_Info
+    col = mongo_conn.spider.All_Company_Info
     detail_info = DetailInfo()
 
     # detail_info.get_detail("http://www.tianyancha.com/company/2546208953")
     #
     urls = []
-    for data in col.find({"状态": "已完成"}):
+    for data in col.find({"状态": "未完成"}):
         url = data["url"]
+        # detail_info.get_detail(url)
         urls.append(url)
 
     threadingpool = ThreadingPool()
