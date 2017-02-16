@@ -38,7 +38,7 @@ def thread_go(ls_return):
             component_id = save_to_component(conn, cc_code, cc_b2c_kiid, cc_b2c_brid, uuid)
             if not component_id:
                 continue
-            update_crawl_uuid(conn, uuid=uuid, code=cc_code)
+            # update_crawl_uuid(conn, uuid=uuid, code=cc_code)
             conn.commit()
             print("go")
         conn.close()
@@ -47,7 +47,7 @@ def thread_go(ls_return):
 
 
 # 更新爬虫表的uuid
-def update_crawl_uuid(conn, uuid, code, taskid=7777777):
+def update_crawl_uuid(conn, uuid, code, taskid=9999999):
     cursor = conn.cursor()
     cursor.execute(
         "update product$component_crawl set cc_uuid='{}' where cc_task={} and cc_code='{}'".format(

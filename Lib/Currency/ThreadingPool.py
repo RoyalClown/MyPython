@@ -9,17 +9,18 @@ IO 密集型任务选择multiprocessing.dummy，CPU 密集型任务选择multipr
 
 
 class ThreadingPool:
-    def __init__(self):
+    def __init__(self, num):
+        self.num = num
         pass
 
     def multi_process(self, fun, lists):
-        pool = Pool(20)
+        pool = Pool(self.num)
         pool.map(fun, lists)
         pool.close()
         pool.join()
 
     def multi_thread(self, fun, lists):
-        pool = ThreadPool(12)
+        pool = ThreadPool(self.num)
         pool.map(fun, lists)
         pool.close()
         pool.join()
@@ -33,7 +34,7 @@ if __name__ == "__main__":
 
 
     attrs = [1, 2, 3]
-    threadingpool = ThreadingPool()
+    threadingpool = ThreadingPool(4)
     threadingpool.multi_process(add, attrs)
 
 
