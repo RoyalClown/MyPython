@@ -19,11 +19,16 @@ class PhoneVerification:
             base_info = data["data"]["baseInfo"]
             company_name = base_info["name"]
             try:
+                email = base_info["email"]
+            except Exception as e:
+                print(e)
+                email = "null"
+            try:
                 phone_num = base_info["phoneNumber"]
             except Exception as e:
                 print(e)
                 phone_num = "null"
-            phone_nums += company_name + "," + phone_num + "\n"
+            phone_nums += company_name + "," + phone_num + "," + email + "\n"
 
         with open("..//statistics//phone_num.csv", "wb") as f:
             f.write("公司名称,电话号码\n".encode())
