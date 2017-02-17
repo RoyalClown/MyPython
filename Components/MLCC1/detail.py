@@ -67,8 +67,11 @@ class MLCC1Detail:
             product_brand = all_p_tags[0].span.text
 
             product_parameter = all_p_tags[0].find(name="a", id="params").text
-
-            product_pdf = product_tag.find(name="a", attrs={"data-id": "pdf"}).get("href")
+            try:
+                product_pdf = product_tag.find(name="a", attrs={"data-id": "pdf"}).get("href")
+            except Exception as e:
+                print(e)
+                product_pdf = ""
             if "http://" not in product_pdf:
                 product_pdf = Pre_Url + product_pdf
 

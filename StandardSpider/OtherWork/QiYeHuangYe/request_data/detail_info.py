@@ -114,6 +114,6 @@ if __name__ == "__main__":
         # detail_info.get_detail(url)
         urls.append(url)
 
-    threadingpool = ThreadingPool()
+    threadingpool = ThreadingPool(10)
     threadingpool.multi_thread(detail_info.get_detail, urls)
 # Valentine's Day

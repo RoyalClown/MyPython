@@ -61,7 +61,7 @@ class SearchList:
                 self.proxy_pool.remove(self.proxy_ip)
                 continue
             break
-        conn = MongoClient()
+        conn = MongoClient("10.10.101.22", 27017)
         try:
             json_list = json.loads(content)
         except Exception as e:
@@ -89,7 +89,7 @@ class SearchList:
 
 if __name__ == "__main__":
     socket.setdefaulttimeout(30)
-    mongo_conn = MongoClient()
+    mongo_conn = MongoClient("10.10.101.22", 27017)
     col = mongo_conn.spider.All_Company_Name
     search_list = SearchList()
     key_words = []
@@ -98,5 +98,5 @@ if __name__ == "__main__":
         # search_list.get_all_urls(key_word)
         key_words.append(key_word)
 
-    threadingpool = ThreadingPool()
+    threadingpool = ThreadingPool(10)
     threadingpool.multi_thread(search_list.get_all_urls, key_words)
