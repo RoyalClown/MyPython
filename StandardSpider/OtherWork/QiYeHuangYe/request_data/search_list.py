@@ -61,8 +61,15 @@ class SearchList:
                 self.proxy_pool.remove(self.proxy_ip)
                 continue
             break
-        conn = MongoClient("10.10.101.22", 27017)
+        while True:
+            try:
+                conn = MongoClient("10.10.101.22", 27017)
+                break
+            except Exception as e:
+                print(e)
+                continue
         try:
+
             json_list = json.loads(content)
         except Exception as e:
             print(e)
@@ -98,5 +105,5 @@ if __name__ == "__main__":
         # search_list.get_all_urls(key_word)
         key_words.append(key_word)
 
-    threadingpool = ThreadingPool(50)
+    threadingpool = ThreadingPool(100)
     threadingpool.multi_process(search_list.get_all_urls, key_words)

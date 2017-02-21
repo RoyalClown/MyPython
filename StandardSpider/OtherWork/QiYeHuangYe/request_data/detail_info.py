@@ -91,7 +91,13 @@ class DetailInfo:
             except Exception as e:
                 print(e)
 
-        conn = MongoClient("10.10.101.22", 27017)
+        while True:
+            try:
+                conn = MongoClient("10.10.101.22", 27017)
+                break
+            except Exception as e:
+                print(e)
+                continue
 
         col = conn.spider.All_Company_Info
         if not brief_companies:

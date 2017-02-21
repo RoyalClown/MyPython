@@ -3,7 +3,7 @@ import re
 
 import requests
 
-from Lib.NetCrawl.Constant import Local_Proxies
+from Lib.NetCrawl.Constant import Default_Header
 
 
 class ProxyPool:
@@ -24,13 +24,13 @@ class ProxyPool:
         # 米扑代理
         api = "http://proxy.mimvp.com/api/fetch.php?orderid=860170208153000672&num=1000&country_group=1&anonymous=5&result_fields=1,2"
         # 本地代理
-        local_api = Local_Proxies
+        # api = "http://proxy.mimvp.com/api/fetch.php?orderid=860170208153000672&num=100&country_group=1&anonymous=5&result_fields=1,2"
+
         try:
-            if not api:
-                proxies = local_api
-            else:
-                res = requests.get(api)
-                proxies = re.findall(r'\d+\.\d+\.\d+\.\d+:\d+', res.text)
+            my_session = requests.session()
+            my_session.headers.update(Default_Header)
+            res = my_session.get(api)
+            proxies = re.findall(r'\d+\.\d+\.\d+\.\d+:\d+', res.text)
             if not self.flag:
                 proxy_ips = proxies
             else:
