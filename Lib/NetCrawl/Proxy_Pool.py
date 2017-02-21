@@ -3,6 +3,8 @@ import re
 
 import requests
 
+from Lib.NetCrawl.Constant import Local_Proxies
+
 
 class ProxyPool:
     def __init__(self, flag=True):
@@ -16,11 +18,19 @@ class ProxyPool:
             return
         self._refreshing = True
         proxies = []
-        # api = "http://api.kxdaili.com/?api=201701061559053530&dengji=%E9%AB%98%E5%8C%BF&sleep=5%E7%A7%92%E5%86%85&gb=4"
-        api = "http://proxy.mimvp.com/api/fetch.php?orderid=860170208153000672&num=100&country_group=1&http_type=1,2&anonymous=5&ping_time=0.3&transfer_time=1"
+        api = ""
+        # 免费ip
+        # api = "http://www.66ip.cn/nmtq.php?getnum=800&isp=0&anonymoustype=3&start=&ports=&export=&ipaddress=&area=1&proxytype=2&api=66ip"
+        # 米扑代理
+        api = "http://proxy.mimvp.com/api/fetch.php?orderid=860170208153000672&num=1000&country_group=1&anonymous=5&result_fields=1,2"
+        # 本地代理
+        local_api = Local_Proxies
         try:
-            res = requests.get(api)
-            proxies = re.findall(r'\d+\.\d+\.\d+\.\d+:\d+', res.text)
+            if not api:
+                proxies = local_api
+            else:
+                res = requests.get(api)
+                proxies = re.findall(r'\d+\.\d+\.\d+\.\d+:\d+', res.text)
             if not self.flag:
                 proxy_ips = proxies
             else:

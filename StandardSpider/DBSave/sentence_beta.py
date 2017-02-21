@@ -2,7 +2,6 @@ import time
 from threading import Timer
 
 import cx_Oracle
-import dill
 from StandardSpider.DataAnalyse.valueProcessing.propertyValueModify import PropertyValueModify
 from Lib.Currency.ThreadingPool import ThreadingPool
 from Lib.DBConnection.Constant import Oracle_Url
@@ -135,11 +134,15 @@ def div_list(ls, n):
 if __name__ == "__main__":
     while True:
         rows = get_component2()
-        ls_return = div_list(rows, 20)
+        if len(rows) > 19:
+            ls_return = div_list(rows, 20)
+            threadingpool = ThreadingPool(50)
+            threadingpool.multi_process(thread_go, ls_return)
+        else:
+            thread_go(rows)
         if len(rows) == 0:
             break
         # for ls_ret in ls_return:
         #     thread_go(ls_ret)
 
-        threadingpool = ThreadingPool()
-        threadingpool.multi_process(thread_go, ls_return)
+

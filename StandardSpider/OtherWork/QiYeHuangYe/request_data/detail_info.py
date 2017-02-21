@@ -84,10 +84,15 @@ class DetailInfo:
                 self.proxy_pool.remove(self.proxy_ip)
                 self.proxy_ip = self.proxy_pool.get()
                 continue
-            break
-        conn = MongoClient()
-        json_list = json.loads(content)
-        brief_companies = json_list["data"]
+            try:
+                json_list = json.loads(content)
+                brief_companies = json_list["data"]
+                break
+            except Exception as e:
+                print(e)
+
+        conn = MongoClient("10.10.101.22", 27017)
+
         col = conn.spider.All_Company_Info
         if not brief_companies:
             print(url, "无数据")
@@ -102,7 +107,7 @@ class DetailInfo:
 
 if __name__ == "__main__":
     socket.setdefaulttimeout(30)
-    mongo_conn = MongoClient()
+    mongo_conn = MongoClient("10.10.101.22", 27017)
     col = mongo_conn.spider.All_Company_Info
     detail_info = DetailInfo()
 
@@ -114,6 +119,6 @@ if __name__ == "__main__":
         # detail_info.get_detail(url)
         urls.append(url)
 
-    threadingpool = ThreadingPool(10)
-    threadingpool.multi_thread(detail_info.get_detail, urls)
+    threadingpool = ThreadingPool(500)
+    threadingpool.multi_process(detail_info.get_detail, urls)
 # Valentine's Day
