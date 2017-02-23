@@ -9,7 +9,7 @@ from pymongo import MongoClient
 
 from Lib.Currency.ThreadingPool import ThreadingPool
 from Lib.NetCrawl.Proxy_Pool import ProxyPool
-from StandardSpider.OtherWork.QiYeHuangYe.request_data.Constant import TianYan_Detail_Headers, TianYan_Detail_Cookies
+from SuppliersInfo.request_data.Constant import TianYan_Detail_Headers, TianYan_Detail_Cookies
 
 
 class DetailInfo:
