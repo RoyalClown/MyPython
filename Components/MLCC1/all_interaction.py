@@ -74,7 +74,7 @@ class AllInteraction:
                 self.detail = MLCC1Detail(second_class)
                 page_urls = self.detail.get_class_components()
 
-                threadingpool = ThreadingPool(20)
+                threadingpool = ThreadingPool(12)
                 threadingpool.multi_process(self.thread_go, page_urls)
 
 if __name__ == "__main__":

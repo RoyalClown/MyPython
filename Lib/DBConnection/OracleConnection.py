@@ -1,6 +1,6 @@
 import cx_Oracle
 
-from Lib.DBConnection.Constant import Oracle_Url
+from Lib.DBConnection.Constant import B2B_Oracle_Url
 import os
 
 os.environ["NLS_LANG"] = ".AL32UTF8"
@@ -9,7 +9,7 @@ os.environ["NLS_LANG"] = ".AL32UTF8"
 class OracleConnection:
     # 存储数据
     def __init__(self, ):
-        self.conn = cx_Oracle.connect(Oracle_Url)
+        self.conn = cx_Oracle.connect(B2B_Oracle_Url)
 
     def retrieve(self):
         pass

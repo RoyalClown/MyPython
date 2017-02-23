@@ -9,12 +9,11 @@ from Lib.NetCrawl.HtmlAnalyse import HtmlAnalyse
 from Lib.NetCrawl.Proxy_Pool import ProxyPool
 
 
-
-class SuppliersList:
+class Soudh:
     def __init__(self):
         self.proxy_pool = ProxyPool(flag=False)
         self.proxy_ip = self.proxy_pool.get()
-        conn = MongoClient()
+        conn = MongoClient("10.10.101.22", 27017)
         self.db = conn.spider
 
     def get_suppliers(self):
@@ -58,5 +57,5 @@ class SuppliersList:
 
 
 if __name__ == "__main__":
-    supplierlist = SuppliersList()
+    supplierlist = Soudh()
     supplierlist.get_suppliers()
