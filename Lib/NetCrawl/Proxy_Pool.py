@@ -3,7 +3,7 @@ import re
 
 import requests
 
-from Lib.NetCrawl.Constant import Local_Proxies
+from Lib.NetCrawl.Constant import Default_Header
 
 
 class ProxyPool:
@@ -11,7 +11,6 @@ class ProxyPool:
         self.flag = flag
         self._refreshing = False
         self._refresh()
-
 
     def _refresh(self):
         if self._refreshing:
@@ -22,15 +21,15 @@ class ProxyPool:
         # 免费ip
         # api = "http://www.66ip.cn/nmtq.php?getnum=800&isp=0&anonymoustype=3&start=&ports=&export=&ipaddress=&area=1&proxytype=2&api=66ip"
         # 米扑代理
-        api = "http://proxy.mimvp.com/api/fetch.php?orderid=860170208153000672&num=1000&country_group=1&anonymous=5&result_fields=1,2"
+        api = "http://proxy.mimvp.com/api/fetch.php?orderid=860170208153000672&num=100&country_group=1&anonymous=5&result_fields=1,2"
         # 本地代理
-        local_api = Local_Proxies
+        # api = "http://proxy.mimvp.com/api/fetch.php?orderid=860170208153000672&num=100&country_group=1&anonymous=5&result_fields=1,2"
+
         try:
-            if not api:
-                proxies = local_api
-            else:
-                res = requests.get(api)
-                proxies = re.findall(r'\d+\.\d+\.\d+\.\d+:\d+', res.text)
+            my_session = requests.session()
+            my_session.headers.update(Default_Header)
+            res = my_session.get(api)
+            proxies = re.findall(r'\d+\.\d+\.\d+\.\d+:\d+', res.text)
             if not self.flag:
                 proxy_ips = proxies
             else:

@@ -4,12 +4,12 @@ from threading import Timer
 import cx_Oracle
 from StandardSpider.DataAnalyse.valueProcessing.propertyValueModify import PropertyValueModify
 from Lib.Currency.ThreadingPool import ThreadingPool
-from Lib.DBConnection.Constant import Oracle_Url
+from Lib.DBConnection.Constant import B2B_Oracle_Url
 from Lib.DBConnection.OracleConnection import OracleConnection
 
 
 def get_component2():
-    conn = cx_Oracle.connect(Oracle_Url)
+    conn = cx_Oracle.connect(B2B_Oracle_Url)
     cursor = conn.cursor()
     cursor.execute(
         "select /*+ first_rows */  cc_code, cc_b2c_brid, cc_b2c_kiid from product$component_crawl abc where cc_task = '9999999' and cc_b2c_brid is not null and cc_b2c_kiid is not null and cc_uuid is null and not exists (select 1 from product$component where abc.cc_code=cmp_code and abc.cc_b2c_brid=cmp_brid) and rownum < 10000")
@@ -21,7 +21,7 @@ def get_component2():
 
 
 def thread_go(ls_return):
-    conn = cx_Oracle.connect(Oracle_Url)
+    conn = cx_Oracle.connect(B2B_Oracle_Url)
     try:
         for row in ls_return:
             cc_code = row[0]
@@ -65,7 +65,7 @@ def find_component(conn, brid, code):
 
 # 如果不存在，则重新生成uuid
 def make_uuid(kiid):
-    conn = cx_Oracle.connect(Oracle_Url)
+    conn = cx_Oracle.connect(B2B_Oracle_Url)
     cursor = conn.cursor()
     cursor.execute("select ki_cmpprefix,ki_cmpsuffix from product$kind where ki_id={}".format(kiid))
 

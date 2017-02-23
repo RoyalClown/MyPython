@@ -1,6 +1,6 @@
 import time
 
-from DataAnalyse.valueProcessing.propertyValueModify import PropertyValueModify
+from StandardSpider.DataAnalyse.valueProcessing.propertyValueModify import PropertyValueModify
 from Lib.DBConnection.OracleConnection import OracleConnection
 
 

@@ -1,15 +1,14 @@
 import json
 import re
 import socket
-
-import requests
 import time
 
+import requests
 from pymongo import MongoClient
 
 from Lib.Currency.ThreadingPool import ThreadingPool
 from Lib.NetCrawl.Proxy_Pool import ProxyPool
-from StandardSpider.OtherWork.QiYeHuangYe.request_data.Constant import TianYan_Headers, TianYan_Cookies
+from SuppliersInfo.request_data.Constant import TianYan_Headers, TianYan_Cookies
 
 
 class SearchList:
@@ -98,5 +97,5 @@ if __name__ == "__main__":
         # search_list.get_all_urls(key_word)
         key_words.append(key_word)
 
-    threadingpool = ThreadingPool(50)
+    threadingpool = ThreadingPool(10)
     threadingpool.multi_process(search_list.get_all_urls, key_words)

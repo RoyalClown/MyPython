@@ -91,15 +91,26 @@ class DetailInfo:
             except Exception as e:
                 print(e)
 
-        conn = MongoClient("10.10.101.22", 27017)
+        while True:
+            try:
+                conn = MongoClient("10.10.101.22", 27017)
+                break
+            except Exception as e:
+                print(e)
+                continue
 
         col = conn.spider.All_Company_Info
         if not brief_companies:
             print(url, "无数据")
             col.update({"url": url}, {'$set': {"状态": "无数据"}})
         else:
-            col.update({"url": url}, {'$set': {"data": brief_companies, "状态": "已完成"}})
-            print(url, "已完成")
+            while True:
+                try:
+                    col.update({"url": url}, {'$set': {"data": brief_companies, "状态": "已完成"}})
+                    print(url, "已完成")
+                    break
+                except Exception as e:
+                    print(e)
         conn.close()
 
         return
