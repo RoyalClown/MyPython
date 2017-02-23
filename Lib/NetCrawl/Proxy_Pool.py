@@ -12,7 +12,6 @@ class ProxyPool:
         self._refreshing = False
         self._refresh()
 
-
     def _refresh(self):
         if self._refreshing:
             return

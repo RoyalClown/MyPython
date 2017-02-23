@@ -64,7 +64,10 @@ class MLCC1Detail:
         many_components_properties = []
         for product_tag in product_tags:
             all_p_tags = product_tag.find_all(name="p")
-            product_code = all_p_tags[0].b.a.text
+            try:
+                product_code = all_p_tags[0].b.a.text
+            except:
+                continue
 
             product_brand = all_p_tags[0].span.text
 
