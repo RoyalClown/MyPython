@@ -1,14 +1,15 @@
 import json
 import re
 import socket
-import time
 
 import requests
+import time
+
 from pymongo import MongoClient
 
 from Lib.Currency.ThreadingPool import ThreadingPool
 from Lib.NetCrawl.Proxy_Pool import ProxyPool
-from SuppliersInfo.request_data.Constant import TianYan_Headers, TianYan_Cookies
+from StandardSpider.OtherWork.QiYeHuangYe.request_data.Constant import TianYan_Headers, TianYan_Cookies
 
 
 class SearchList:
@@ -60,8 +61,15 @@ class SearchList:
                 self.proxy_pool.remove(self.proxy_ip)
                 continue
             break
-        conn = MongoClient("10.10.101.22", 27017)
+        while True:
+            try:
+                conn = MongoClient("10.10.101.22", 27017)
+                break
+            except Exception as e:
+                print(e)
+                continue
         try:
+
             json_list = json.loads(content)
         except Exception as e:
             print(e)
@@ -97,5 +105,5 @@ if __name__ == "__main__":
         # search_list.get_all_urls(key_word)
         key_words.append(key_word)
 
-    threadingpool = ThreadingPool(10)
+    threadingpool = ThreadingPool(100)
     threadingpool.multi_process(search_list.get_all_urls, key_words)
