@@ -109,5 +109,5 @@ if __name__ == "__main__":
         # search_list.get_all_urls(key_word)
         key_words.append(key_word)
 
-    threadingpool = ThreadingPool(300)
+    threadingpool = ThreadingPool(500)
     threadingpool.multi_process(search_list.get_all_urls, key_words)
