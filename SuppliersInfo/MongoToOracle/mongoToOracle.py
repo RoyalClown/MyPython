@@ -112,7 +112,7 @@ if __name__ == "__main__":
     mongo_to_oracle = MongoToOracle()
     datas = mongo_to_oracle.get_mongo_data()
 
-    threadingpool = ThreadingPool(10)
+    threadingpool = ThreadingPool(8)
     threadingpool.multi_process(mongo_to_oracle.data_to_oracle, datas)
 
     # for data in datas:

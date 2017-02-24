@@ -61,37 +61,41 @@ class SearchList:
                 self.proxy_pool.remove(self.proxy_ip)
                 continue
             break
+        try:
+
+            json_list = json.loads(content)
+            brief_companies = json_list["data"]
+
+        except Exception as e:
+            print(e)
+            return
+
         while True:
             try:
                 conn = MongoClient("10.10.101.22", 27017)
+                if not brief_companies:
+                    print(key_word, "无数据")
+                    col = conn.spider.All_Company_Name
+                    col.update({"corporation": key_word}, {'$set': {"状态": "无数据"}}, multi=True)
+                    conn.close()
+                    return
+
+                for brief_company in brief_companies:
+                    company_id = brief_company["id"]
+                    detail_company_url = "http://www.tianyancha.com/company/" + str(company_id)
+                    detail_company = {"company_id": company_id, "url": detail_company_url, "状态": "未完成"}
+                    detail_col = conn.spider.All_Company_Info
+                    detail_col.update({"company_id": company_id}, {'$set': detail_company}, upsert=True)
+                col = conn.spider.All_Company_Name
+                col.update({"corporation": key_word}, {'$set': {"状态": "已完成"}}, multi=True)
+                print(key_word, "已完成")
+                conn.close()
                 break
             except Exception as e:
                 print(e)
                 continue
-        try:
 
-            json_list = json.loads(content)
-        except Exception as e:
-            print(e)
-            return
-        brief_companies = json_list["data"]
-        if not brief_companies:
-            print(key_word, "无数据")
-            col = conn.spider.All_Company_Name
-            col.update({"corporation": key_word}, {'$set': {"状态": "无数据"}}, multi=True)
-            conn.close()
-            return
 
-        for brief_company in brief_companies:
-            company_id = brief_company["id"]
-            detail_company_url = "http://www.tianyancha.com/company/" + str(company_id)
-            detail_company = {"company_id": company_id, "url": detail_company_url, "状态": "未完成"}
-            detail_col = conn.spider.All_Company_Info
-            detail_col.update({"company_id": company_id}, {'$set': detail_company}, upsert=True)
-        col = conn.spider.All_Company_Name
-        col.update({"corporation": key_word}, {'$set': {"状态": "已完成"}}, multi=True)
-        print(key_word, "已完成")
-        conn.close()
 # 470
 
 if __name__ == "__main__":
@@ -105,5 +109,5 @@ if __name__ == "__main__":
         # search_list.get_all_urls(key_word)
         key_words.append(key_word)
 
-    threadingpool = ThreadingPool(100)
+    threadingpool = ThreadingPool(300)
     threadingpool.multi_process(search_list.get_all_urls, key_words)

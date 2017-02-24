@@ -124,6 +124,6 @@ if __name__ == "__main__":
         # detail_info.get_detail(url)
         urls.append(url)
 
-    threadingpool = ThreadingPool(500)
+    threadingpool = ThreadingPool(800)
     threadingpool.multi_process(detail_info.get_detail, urls)
 # Valentine's Day
