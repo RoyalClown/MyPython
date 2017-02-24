@@ -92,7 +92,7 @@ class PdfDownload:
             filename = self.download(pdfurl)
             self.upload(filename, pdfurl)
 
-        threading_pool = ThreadingPool()
+        threading_pool = ThreadingPool(8)
         threading_pool.multi_thread(thread, pdf_urls)
 
 
