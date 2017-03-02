@@ -22,7 +22,9 @@ class SearchList:
             self.proxy_ip = self.proxy_pool.get()
 
             my_session = requests.session()
-            my_session.headers.update(TianYan_Headers)
+            tianyan_headers = TianYan_Headers
+            tianyan_headers["Referer"] = ("http://www.tianyancha.com/search?key=" + key_word + "&checkFrom=searchBox").encode().decode('latin-1')
+            my_session.headers.update(tianyan_headers)
             try:
                 my_session.proxies.update(self.proxy_ip)
             except Exception as e:
@@ -109,5 +111,5 @@ if __name__ == "__main__":
         # search_list.get_all_urls(key_word)
         key_words.append(key_word)
 
-    threadingpool = ThreadingPool(500)
+    threadingpool = ThreadingPool(300)
     threadingpool.multi_process(search_list.get_all_urls, key_words)

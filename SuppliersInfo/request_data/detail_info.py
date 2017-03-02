@@ -114,7 +114,7 @@ if __name__ == "__main__":
     socket.setdefaulttimeout(30)
     mongo_conn = MongoClient("10.10.101.22", 27017)
     col = mongo_conn.spider.All_Company_Info
-    detail_info = DetailInfo()
+
 
     # detail_info.get_detail("http://www.tianyancha.com/company/2546208953")
     #
@@ -123,7 +123,7 @@ if __name__ == "__main__":
         url = data["url"]
         # detail_info.get_detail(url)
         urls.append(url)
-
+    detail_info = DetailInfo()
     threadingpool = ThreadingPool(800)
     threadingpool.multi_process(detail_info.get_detail, urls)
 # Valentine's Day

@@ -18,7 +18,7 @@ TianYan_Headers = {
     "Connection": "keep-alive",
     "Host": "www.tianyancha.com",
     "Tyc-From": "normal",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.101 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36",
 }
 TianYan_Detail_Headers = {
     "Accept": "application/json, text/plain, */*",
@@ -31,16 +31,17 @@ TianYan_Detail_Headers = {
 }
 
 TianYan_Cookies = {
-    "TYCID": "507c54ed79f24f5b91be31d1bd5181a2",
-    "tnet": "183.15.177.109",
+    "TYCID": "ae8b3cda88024698bae7569c946cfc2e",
+    "tnet": "183.15.177.163",
     "RTYCID": "a52996f773e34d5d8fe33fbe77024a4e",
-    "aliyungf_tc": "AQAAAOPKRSE0XgIAbbEPtxQvuOglXAKD",
-    "_pk_ref.1.e431": "%5B%22%22%2C%22%22%2C1484964187%2C%22https%3A%2F%2Fwww.baidu.com%2Flink%3Furl%3Dromo1DY68BORaXNLFXjqOpXSENEvHqYbZmUvBXrLtxHcOuwbZwzQuxOwkrWHXcLI%26wd%3D%26eqid%3D95cc0ae70004bd84000000065882afcd%22%5D",
-    "_pk_id.1.e431": "c06786e5b4b69640.1484296359.19.1484965768.1484964187.",
+    "aliyungf_tc": "AQAAAIqyiH3yjQkAo7EPt2HtoOPrYFlG",
+    "_pk_ref.1.e431": "%5B%22%22%2C%22%22%2C1488155453%2C%22https%3A%2F%2Fwww.baidu.com%2Flink%3Furl%3D8MY45dUuLowdW5AePGz0DUITtKyJQT6XVBY8T3zsoWKGSwjxTeP1ASF2x9wN5M7m%26wd%3D%26eqid%3D9b03d9c5004d00580000000658b37338%22%5D",
+    "_pk_id.1.e431": "52cb68213b157446.1488155453.1.1488155553.1488155453.",
     "_pk_ses.1.e431": "*",
-    "Hm_lvt_e92c8d65d92d534b0fc290df538b4758": "1484296359,1484643485,1484959709,1484960505",
-    "Hm_lpvt_e92c8d65d92d534b0fc290df538b4758": "1484965768",
-    "_utm": "ec8d12f880154503ad0a1e15fd076e00"
+    "Hm_lvt_e92c8d65d92d534b0fc290df538b4758": "1488155455",
+    "Hm_lpvt_e92c8d65d92d534b0fc290df538b4758": "1488155553",
+    "_utm": "ca24d64d9ef3463a8cded84729bc1cb5",
+    "paaptp": "3744d4573918818fbd27ba5370063309edcfaed93c04f6ab0515a7cfbad89"
 }
 
 TianYan_Detail_Cookies = {
