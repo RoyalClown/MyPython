@@ -30,11 +30,12 @@ class MLCC1Detail:
     def get_page_components(self, page_url):
         my_headers = First_Headers
         my_cookies = First_Cookies
-        my_session = requests.session()
-        my_session.headers.update(my_headers)
-        my_session.cookies.update(my_cookies)
+
         while True:
             try:
+                my_session = requests.session()
+                my_session.headers.update(my_headers)
+                my_session.cookies.update(my_cookies)
                 my_session.proxies.update(self.proxy_ip)
                 pass
             except Exception as e:
@@ -47,7 +48,7 @@ class MLCC1Detail:
                 res = my_session.get(page_url, timeout=15)
                 content = res.content.decode()
             except Exception as e:
-                print(sys._getframe().f_code.co_name, e)
+                print(e)
                 self.proxy_pool.remove(self.proxy_ip)
                 self.proxy_ip = self.proxy_pool.get()
                 continue
@@ -69,18 +70,19 @@ class MLCC1Detail:
             except:
                 continue
 
-            product_brand = all_p_tags[0].span.text
+            product_brand = all_p_tags[0].find(name='a', id='brand_n').text
 
             product_parameter = all_p_tags[0].find(name="a", id="params").text
             try:
                 product_pdf = product_tag.find(name="a", attrs={"data-id": "pdf"}).get("href")
+                if "http://" not in product_pdf:
+                    product_pdf = Pre_Url + product_pdf
             except Exception as e:
                 print(sys._getframe().f_code.co_name, e)
                 product_pdf = ""
-            if "http://" not in product_pdf:
-                product_pdf = Pre_Url + product_pdf
 
-            component = (product_code, product_pdf, "null", product_brand, self.first_class_name, self.second_class_name, page_url)
+            component = (
+            product_code, product_pdf, "null", product_brand, self.first_class_name, self.second_class_name, page_url)
 
             properties = [("product_parameter", product_parameter), ]
             try:
@@ -99,6 +101,7 @@ class MLCC1Detail:
             component_properties = (component, properties)
             many_components_properties.append(component_properties)
         return many_components_properties
+
 
 if __name__ == "__main__":
     detail = MLCC1Detail(('电容', 'MLCC', 'http://www.mlcc1.com/search_simple.html?searchkey=&flag=3', 20210))
