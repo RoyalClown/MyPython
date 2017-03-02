@@ -19,6 +19,7 @@ class MongoToOracle:
         conn = MongoClient("10.10.101.22", 27017)
         col = conn.spider.All_Company_Info
         datas = col.find({"入库": None, "状态": "已完成"})
+        conn.close()
         return datas
 
     def oracle_save(self, company):
@@ -99,6 +100,7 @@ class MongoToOracle:
                 mongo_conn = MongoClient("10.10.101.22", 27017)
                 col = mongo_conn.spider.All_Company_Info
                 col.update({"url": url}, {'$set': {"入库": "已完成"}})
+                mongo_conn.close()
                 break
             except Exception as e:
                 print(e)
