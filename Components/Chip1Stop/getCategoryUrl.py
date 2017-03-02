@@ -1,6 +1,7 @@
 import re
 
 import requests
+import sys
 from bs4 import BeautifulSoup
 
 from Lib.Currency.ThreadingPool import ThreadingPool
@@ -22,7 +23,7 @@ class Category:
                 bs_content = html_analsye.get_bs_contents()
                 break
             except Exception as e:
-                print(e)
+                print(sys._getframe().f_code.co_name, e)
                 self.proxy_pool.remove(self.proxy_ip)
                 self.proxy_ip = self.proxy_pool.get()
 
@@ -35,9 +36,9 @@ class Category:
             for second_directory_tag in second_directory_tags:
                 rough_second_directory_name = second_directory_tag.text
                 second_directory_name = re.match(r"(.*?)\[", rough_second_directory_name).group(1).strip()
-                second_directory_url = "http://www.chip1stop.com/web/CHN/zh" + second_directory_tag.span.a.get("href")[1:]
+                second_directory_url = "http://www.chip1stop.com/web/CHN/zh" + second_directory_tag.span.a.get("href")[
+                                                                               1:]
                 second_directory = (first_directory_name, second_directory_name, second_directory_url)
-                print(second_directory)
                 second_categories.append(second_directory)
         return second_categories
 
@@ -93,7 +94,7 @@ class Category:
                     self.proxy_pool.remove(self.proxy_ip)
                     self.proxy_ip = self.proxy_pool.get()
                 except Exception as e:
-                    print(e)
+                    print(sys._getframe().f_code.co_name, e)
                     self.proxy_pool.remove(self.proxy_ip)
             content = res.content.decode()
             bs_content = BeautifulSoup(content, "lxml")
@@ -103,7 +104,7 @@ class Category:
             property_name_tags = table_headers_tag.find_all(name="td")
             # 器件参数名称
             property_names = []
-            for property_name_tag in property_name_tags:
+            for property_name_tag in property_name_tags[6:-1]:
                 property_name = property_name_tag.text.strip()
                 property_names.append(property_name)
             # 总页数
@@ -153,12 +154,11 @@ class Category:
                                 self.proxy_pool.remove(self.proxy_ip)
                                 self.proxy_ip = self.proxy_pool.get()
                         except Exception as e:
-                            print(e)
+                            print(sys._getframe().f_code.co_name, e)
                             self.proxy_pool.remove(self.proxy_ip)
                             self.proxy_ip = self.proxy_pool.get()
 
-                    tr_tags = bs_content.find_all(name="tr")
-
+                    tr_tags = bs_content.find_all(name="tr")[1:]
 
                     # 数据库连接
                     orcl_conn = OracleSave()
@@ -168,20 +168,24 @@ class Category:
                         chip1stop_code = tr_tag.td.find(name="p", attrs={"class": "text10"}).text.strip()
                         print(chip1stop_code)
                         maker = tr_tag.td.find(name="p", attrs={"class": "text10 wordBreak"}).text.strip()
-                        pdf_url = tr_tag.find(name="a", text="数据表").get("href")
+                        pdf_url = tr_tag.find(name="a", text="数据表")
+                        if pdf_url:
+                            pdf_url = pdf_url.get("href")
 
-                        component = (code, maker, first_category_name, second_category_url, pdf_url)
+                        component = (code, maker, first_category_name, second_category_name, second_category_url, pdf_url)
+                        orcl_conn.component_insert(component)
 
-                        property_tags = tr_tag.find_all(name="td")[6:]
-                        property_values = []
-                        for property_tag in property_tags:
+                        property_tags = tr_tag.find_all(name="td")[6:-1]
+                        for property_name, property_tag in zip(property_names, property_tags):
+                            if property_name == '购买/询价':
+                                continue
                             property_value = property_tag.text
                             if property_value:
                                 property_value = property_value.strip()
-                            property_values.append(property_value)
+                            single_property = (property_name, property_value)
+                            orcl_conn.properties_insert(single_property)
 
-                        orcl_conn.component_insert(component)
-                    orcl_conn.commit()
+                    # orcl_conn.commit()
                     orcl_conn.conn.close()
                     # ---------------------------我是分割线----------------------------
 
