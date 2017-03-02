@@ -27,6 +27,7 @@ class AllInteraction:
                         orcl_conn.properties_insert(properties)
                     orcl_conn.commit()
                     orcl_conn.conn.close()
+                    break
                 except Exception as e:
                     print(e, "存储错误")
         return
