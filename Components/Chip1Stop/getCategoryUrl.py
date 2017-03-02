@@ -4,10 +4,10 @@ import requests
 import sys
 from bs4 import BeautifulSoup
 
+from Components.DBSAVE.oracleSave import OracleSave
 from Lib.Currency.ThreadingPool import ThreadingPool
 from Lib.NetCrawl.HtmlAnalyse import HtmlAnalyse
 from Lib.NetCrawl.Proxy_Pool import ProxyPool
-from Components.Chip1Stop.oracleSave import OracleSave
 
 
 class Category:
@@ -161,7 +161,7 @@ class Category:
                     tr_tags = bs_content.find_all(name="tr")[1:]
 
                     # 数据库连接
-                    orcl_conn = OracleSave()
+                    orcl_conn = OracleSave(1000001)
 
                     for tr_tag in tr_tags:
                         code = tr_tag.td.find(name="p", attrs={"class": "text14pt2 bold"}).text.strip()
