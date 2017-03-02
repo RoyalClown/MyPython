@@ -21,7 +21,7 @@ class ProxyPool:
         # 免费ip
         # api = "http://www.66ip.cn/nmtq.php?getnum=800&isp=0&anonymoustype=3&start=&ports=&export=&ipaddress=&area=1&proxytype=2&api=66ip"
         # 米扑代理
-        api = "http://proxy.mimvp.com/api/fetch.php?orderid=860170208153000672&num=1000&country_group=1&anonymous=5&result_fields=1,2"
+        api = "http://proxy.mimvp.com/api/fetch.php?orderid=860170208153000672&num=100&country_group=1&anonymous=5&result_fields=1,2"
         # 本地代理
         # api = "http://www.66ip.cn/nmtq.php?getnum=800&isp=0&anonymoustype=3&start=&ports=&export=&ipaddress=&area=1&proxytype=2&api=66ip"
 

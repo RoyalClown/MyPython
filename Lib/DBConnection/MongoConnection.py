@@ -47,8 +47,5 @@ class MongoConnection:
 
 
 if __name__ == "__main__":
-    connection = MongoConnection()
-    data_list = connection.db_retrieve()
-    for i in data_list:
-        time.sleep(0.01)
-        print(i)
+    # connection = MongoConnection()
+    mongo_conn = MongoClient("10.10.101.22", 27017)

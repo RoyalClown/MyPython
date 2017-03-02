@@ -11,12 +11,18 @@ class OracleConnection:
     def __init__(self, ):
         self.conn = cx_Oracle.connect(B2B_Oracle_Url)
 
-    def retrieve(self):
-        pass
+    def retrieve(self, sql_sentence):
+        cursor = self.conn.cursor()
+        cursor.execute(sql_sentence)
+        retrieve_data = cursor.fetchall()
+        return retrieve_data
 
     # 接受处理之后的数据data
-    def insert(self, sql):
+    def insert(self, sql_sentence):
         cursor = self.conn.cursor()
-        insert_data = cursor.execute(sql)
+        cursor.execute(sql_sentence)
         cursor.close()
-        return insert_data
+        return
+
+if __name__ == "__main__":
+    oracle_connection = OracleConnection()
