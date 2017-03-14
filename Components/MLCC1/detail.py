@@ -82,7 +82,7 @@ class MLCC1Detail:
                 product_pdf = ""
 
             component = (
-            product_code, product_pdf, "null", product_brand, self.first_class_name, self.second_class_name, page_url)
+            product_code, product_brand, self.first_class_name, self.second_class_name, page_url, product_pdf, "null")
 
             properties = [("product_parameter", product_parameter), ]
             try:
