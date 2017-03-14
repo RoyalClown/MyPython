@@ -14,7 +14,7 @@ class OracleSave(OracleConnection):
     def component_insert(self, component):
         self.component_id = self.get_component_id()
         cursor = self.conn.cursor()
-        sql = "insert into product$component_crawl(cc_id, cc_task, cc_code, cc_brandname, cc_unit, cc_kiname, cc_url, cc_attach) VALUES ({},{},'{}','{}','{}','{}','{}','{}')".format(
+        sql = "insert into product$component_crawl(cc_id, cc_task, cc_code, cc_brandname, cc_unit, cc_kiname, cc_url, cc_attach, cc_img) VALUES ({},{},'{}','{}','{}','{}','{}','{}', '{}')".format(
             self.component_id, self.task_id, *component)
         insert_data = cursor.execute(sql)
         cursor.close()

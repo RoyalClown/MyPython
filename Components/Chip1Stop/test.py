@@ -4,6 +4,5 @@
     @date:          2017/3/2
 """
 
-a = None
-b = a.strip()
-print(b)
+a = list(range(1, 6))
+print(a)
