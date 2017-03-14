@@ -1,5 +1,5 @@
 """
-    @description:   
+    @description:
     @author:        RoyalClown
     @date:          2017/2/21
 """
@@ -54,7 +54,7 @@ class Shop99114:
             #     thread_go(page_url)
 
             threading_pool = ThreadingPool(12)
-            threading_pool.multi_thread(thread_go, page_urls)
+            threading_pool.multi_process(thread_go, page_urls)
 
             # 企业详情页信息获取
 

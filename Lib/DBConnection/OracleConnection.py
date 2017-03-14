@@ -9,7 +9,12 @@ os.environ["NLS_LANG"] = ".AL32UTF8"
 class OracleConnection:
     # 存储数据
     def __init__(self, ):
-        self.conn = cx_Oracle.connect(B2B_Oracle_Url)
+        while True:
+            try:
+                self.conn = cx_Oracle.connect(B2B_Oracle_Url)
+                break
+            except Exception as e:
+                print(e)
 
     def retrieve(self, sql_sentence):
         cursor = self.conn.cursor()
