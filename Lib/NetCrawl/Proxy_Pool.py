@@ -40,6 +40,7 @@ class ProxyPool:
                 self.proxy_ips = proxy_ips
                 print('init ip pool', len(self.proxy_ips))
                 self._refreshing = False
+                break
             except Exception as e:
                 print(e)
 
