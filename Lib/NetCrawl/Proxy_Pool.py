@@ -7,8 +7,7 @@ from Lib.NetCrawl.Constant import Default_Header
 
 
 class ProxyPool:
-    def __init__(self, flag=True):
-        self.flag = flag
+    def __init__(self):
         self._refreshing = False
         self._refresh()
 
@@ -21,29 +20,28 @@ class ProxyPool:
         # 免费ip
         # api = "http://www.66ip.cn/nmtq.php?getnum=800&isp=0&anonymoustype=3&start=&ports=&export=&ipaddress=&area=1&proxytype=2&api=66ip"
         # 米扑代理
-        api = "http://proxy.mimvp.com/api/fetch.php?orderid=860170208153000672&num=100&country_group=1&anonymous=5&result_fields=1,2"
+        apis = (
+        "http://proxy.mimvp.com/api/fetch.php?orderid=860170208153000672&num=100&country_group=1&anonymous=5&result_fields=1,2",
+        "http://www.66ip.cn/nmtq.php?getnum=800&isp=0&anonymoustype=3&start=&ports=&export=&ipaddress=&area=1&proxytype=2&api=66ip")
         # 本地代理
         # api = "http://www.66ip.cn/nmtq.php?getnum=800&isp=0&anonymoustype=3&start=&ports=&export=&ipaddress=&area=1&proxytype=2&api=66ip"
-
-        try:
-            my_session = requests.session()
-            my_session.headers.update(Default_Header)
-            res = my_session.get(api)
-            proxies = re.findall(r'\d+\.\d+\.\d+\.\d+:\d+', res.text)
-            if not self.flag:
-                proxy_ips = proxies
-            else:
+        for api in apis:
+            try:
+                my_session = requests.session()
+                my_session.headers.update(Default_Header)
+                res = my_session.get(api)
                 proxy_ips = []
-
+                proxies = re.findall(r'\d+\.\d+\.\d+\.\d+:\d+', res.text)
+                if not len(proxies):
+                    continue
                 for proxy in proxies:
                     proxy_ip = {"http": proxy}
                     proxy_ips.append(proxy_ip)
-            self.proxy_ips = proxy_ips
-            print('init ip pool', len(self.proxy_ips))
-            self._refreshing = False
-        except Exception as e:
-            print(e)
-            self._refresh()
+                self.proxy_ips = proxy_ips
+                print('init ip pool', len(self.proxy_ips))
+                self._refreshing = False
+            except Exception as e:
+                print(e)
 
     def get(self):
         if len(self.proxy_ips) > 0:
