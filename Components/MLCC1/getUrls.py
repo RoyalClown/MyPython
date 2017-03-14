@@ -10,7 +10,7 @@ from Lib.NetCrawl.HtmlAnalyse import HtmlAnalyse
 
 
 class GetUrls:
-    def get_first_classes(self, url="http://www.mlcc1.com/search_simple.html?searchkey="):
+    def get_first_classes(self, url="http://www.mlcc1.com/search_simplex.html?searchkey="):
         html_analyse = HtmlAnalyse(url)
         bs_content = html_analyse.get_bs_contents()
 
@@ -30,7 +30,7 @@ class GetUrls:
         first_class_name, first_class_content = first_class
         second_tags = first_class_content.find_all(name="a")
 
-        second_classes = [('电容', 'MLCC', 'http://www.mlcc1.com/search_simple.html?searchkey=&flag=3', 20210)]
+        second_classes = [('电容', 'MLCC', 'http://www.mlcc1.com/search_simplex.html?searchkey=&flag=3', 20210)]
         for second_tag in second_tags:
             second_class_name = re.match(r'(.*?) （(\d+)条', second_tag.text).group(1)
             page_count = int(int(re.match(r'(.*?) （(\d+)条', second_tag.text).group(2)) / 15 + 1)
