@@ -62,7 +62,7 @@ class Category:
             "X-Requested-With": "XMLHttpRequest",
         }
         request_cookie = {
-            "CK_005": "EQKy7F9rCtotYes/HOv7zXraWhy6LhHU05VoKAixt4s=",
+            "CK_005": "jS1czThT76C51HOUQ42UtQ06TsvRnzI105VoKAixt4s=",
             "CK_002": "aYWM1+FztffTlWgoCLG3iw==",
             "CK_001": "v1gP31jjkR0=",
             "CK_007": "cPDwiM71wuQ=",
@@ -71,9 +71,11 @@ class Category:
             "WMONID": "VvpmCoTZsss",
             "_gat": "1",
             "_ga": "GA1.2.1422864444.1488415703",
-            "JSESSIONIDVERSION": "2f633173:14",
-            "JSESSIONID": "1ff28bbeedd48d541615fbe2be29.ap8",
-            "JREPLICA": "c1-instance46",
+            "JSESSIONIDVERSION": "2f633173:8",
+            "JSESSIONID": "b7d640d0a05a7885ab3cab0168cf.ap2",
+            "JREPLICA": "c1-instance6",
+            "id": "27e37541744912b7||t=1486458155|et=730|cs=002213fd4869c45d604be72033",
+            "Referer": "https://www.chip1stop.com/web/CHN/zh/login.do"
         }
         complete_form_data = {
             "nextSearchIndex": "0",
@@ -138,11 +140,11 @@ class Category:
                     chip1stop_code = tr_tag.td.find(name="p", attrs={"class": "text10"}).text.strip()
                     print(chip1stop_code)
                     maker = tr_tag.td.find(name="p", attrs={"class": "text10 wordBreak"}).text.strip()
-                    pdf_url = tr_tag.find(name="a", attrs={"href": re.compile(r".*?pdf")})
+                    pdf_url = tr_tag.find(name="a", attrs={"href": re.compile(r"http://download\.siliconexpert\.com/pdfs")})
                     if pdf_url:
                         pdf_url = pdf_url.get("href")
 
-                    component = (code, maker, first_category_name, second_category_name, second_category_url, pdf_url)
+                    component = (code, maker, first_category_name, second_category_name, second_category_url, pdf_url, None)
                     orcl_conn.component_insert(component)
 
                     property_tags = tr_tag.find_all(name="td")[6:-1]

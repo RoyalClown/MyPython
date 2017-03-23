@@ -1,5 +1,7 @@
 import gzip
 import json
+
+import sys
 from selenium import webdriver
 import requests
 from bs4 import BeautifulSoup
@@ -47,7 +49,7 @@ class HtmlAnalyse:
             driver.quit()
             return contents
         except Exception as e:
-            print(e)
+            print(sys._getframe().f_code.co_name, e)
             self.get_selenium_contents()
 
     # 获得bs对象
@@ -74,7 +76,7 @@ class HtmlAnalyse:
 
     # 下载文件
     def download(self, path):
-        res = self._session.get(self.url, stream=True, timeout=30)
+        res = self._session.get(self.url, stream=True, timeout=30, verify=False)
         if not res.content:
             self.download(path)
         with open(path, 'wb') as f:

@@ -7,6 +7,7 @@ import os
 import random
 
 import requests
+import sys
 
 from DBCurrency.file_system.FileSystemConstant import File_Server_Url
 from Lib.NetCrawl.HtmlAnalyse import HtmlAnalyse
@@ -30,7 +31,7 @@ class FileSystem:
                 print("File Download Success !!")
                 break
             except Exception as e:
-                print(e)
+                print(sys._getframe().f_code.co_name, e)
                 self.proxy_pool.remove(self.proxy_ip)
                 self.proxy_ip = self.proxy_pool.get()
         return download_file_path

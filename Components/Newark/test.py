@@ -5,7 +5,10 @@
 """
 import re
 
-a = '安全系统 - 报警门禁 (119)'.strip()
-flag = re.match(r"(.*?) \((.*?)\)", a).group(2)
-# b = re.match(r"(.*?) \((.*?\))\)$", a).group(1)
-print(flag)
+import requests
+
+from Lib.NetCrawl.HtmlAnalyse import HtmlAnalyse
+
+html_analyse = HtmlAnalyse('https://api.github.com/repos/kennethreitz/requests/git/commits/a050faf084662f3a352dd1a941f2c7c9f886d4ad')
+bs_content = html_analyse.get_bs_contents()
+print(bs_content)

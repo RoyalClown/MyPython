@@ -62,15 +62,23 @@ class NewarkGo:
             except:
                 component_img = ""
             try:
-                component_attach = td_tags[2].find(name="a", attrs={"class": "prodDetailsAttachment"}).get("href")
+                rough_attach = td_tags[2].find(name="a", text="数据表")
+                if not rough_attach:
+                    rough_attach = td_tags[2].find(name="a", attrs={"class": "prodDetailsAttachment"})
+                component_attach = rough_attach.get("href")
                 if "http" not in component_attach:
                     component_attach = ""
+            except Exception as e:
+                print("component_attach is null!!")
+                component_attach = ""
+            try:
                 manufacture_description = td_tags[3].a.find_all(name="p")
                 component_brand = manufacture_description[0].text.strip()
                 component_description = manufacture_description[1].text.strip()
             except Exception as e:
-                print(e)
+                print(sys._getframe().f_code.co_name, e)
                 continue
+
             component = (
             component_code, component_brand, first_category_name, second_category_name, page_url, component_attach,
             component_img)
@@ -114,7 +122,7 @@ class NewarkGo:
                 print(sys._getframe().f_code.co_name, e)
                 # self.proxy_pool.remove(self.proxy_ip)
         pages_properties = []
-        for first_category_tag in first_category_tags[6:]:
+        for first_category_tag in first_category_tags[-2:-1]:
             first_category_name = first_category_tag.li.h2.text.strip()
             second_category_tags = first_category_tag.li.ul.find_all(name="li")
             for second_category_tag in second_category_tags:
