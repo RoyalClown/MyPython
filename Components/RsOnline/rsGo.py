@@ -11,15 +11,24 @@ from Components.DBSAVE.oracleSave import OracleSave
 from Components.RsOnline.Constant import Rs_Pre_Url
 from Lib.Currency.ThreadingPool import ThreadingPool
 from Lib.NetCrawl.HtmlAnalyse import HtmlAnalyse
+from Lib.NetCrawl.Proxy_Pool import ProxyPool
 
 
 class RsGo:
     def __init__(self):
-        pass
+        self.proxy_pool = ProxyPool()
+        self.proxy_ip = self.proxy_pool.get()
 
     def get_second_category(self):
-        html_analyse = HtmlAnalyse("http://china.rs-online.com/web/")
-        bs_content = html_analyse.get_bs_contents()
+        while True:
+            try:
+                self.proxy_ip = self.proxy_pool.get()
+                html_analyse = HtmlAnalyse("http://china.rs-online.com/web/c/pcb-prototyping/pcb-cleaning/", proxy=self.proxy_ip)
+                bs_content = html_analyse.get_bs_contents()
+                break
+            except Exception as e:
+                print(sys._getframe().f_code.co_name, e)
+                self.proxy_pool.remove(self.proxy_ip)
         first_categories = bs_content.find_all(name="div", attrs={"class": "horizontalMenu sectionUp"})
         second_categories = []
         for first_category in first_categories:
@@ -57,11 +66,17 @@ class RsGo:
             bs_content = html_analyse.get_bs_contents()
             page_tag = bs_content.find(name="div", attrs={"class": "viewProdDiv"}).text
             flag = re.match(r".*?共(.*?)个", page_tag)
-            page_count = flag.group(1).strip()
+            page_count = int(int(flag.group(1).strip()) / 20 + 1)
             for page_num in range(int(page_count)):
-                page_url = third_category_url + "?pn=" + str(page_num)
-                html_analyse = HtmlAnalyse(page_url)
-                bs_content = html_analyse.get_bs_contents()
+                page_url = third_category_url + "?pn=" + str(page_num + 1)
+                while True:
+                    try:
+                        html_analyse = HtmlAnalyse(page_url, proxy=self.proxy_ip)
+                        bs_content = html_analyse.get_bs_contents()
+                        break
+                    except Exception as e:
+                        print(sys._getframe().f_code.co_name, e)
+                        self.proxy_pool.remove(self.proxy_ip)
                 component_url_tags = bs_content.find_all(name="a", attrs={"class": "tnProdDesc"})
                 page_attributes = []
                 for component_url_tag in component_url_tags:
