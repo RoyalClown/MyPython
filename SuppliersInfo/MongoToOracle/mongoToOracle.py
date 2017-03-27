@@ -5,6 +5,7 @@
 """
 
 import cx_Oracle
+import sys
 from pymongo import MongoClient
 
 from Lib.Currency.ThreadingPool import ThreadingPool
@@ -49,39 +50,76 @@ class MongoToOracle:
 
     def data_to_oracle(self, data):
         url = data["url"]
-        base_info = data["data"].get("baseInfo")
-        if not base_info:
-            return
-        regInstitute = base_info.get("regInstitute")
-        regCapital = base_info.get("regCapital")
-        regStatus = base_info.get("regStatus")
-        name = base_info.get("name")
-        businessScope = base_info.get("businessScope")
-        estiblishTime = base_info.get("estiblishTime")
-        if not estiblishTime:
-            estiblishTime = 0
-        address = base_info.get("regLocation")
-        type = base_info.get("companyOrgType")
-        businessCode = base_info.get("creditCode")
-        tel = base_info.get("phoneNumber")
-        email = base_info.get("email")
-        industry = base_info.get("industry")
-        corporation = base_info.get("legalPersonName")
-        orgCode = base_info.get("orgNumber")
+        data = data["data"]
 
-        fromTime = base_info.get("fromTime")
-        if not fromTime:
-            fromTime = 0
-        toTime = base_info.get("toTime")
-        if not toTime:
-            toTime = 0
-        approvedTime = base_info.get("approvedTime")
-        if not approvedTime:
-            approvedTime = 0
+        base_info = data.get("baseInfo")
+        if base_info:
 
+            regInstitute = base_info.get("regInstitute")
+            regCapital = base_info.get("regCapital")
+            regStatus = base_info.get("regStatus")
+            name = base_info.get("name")
+            businessScope = base_info.get("businessScope")
+            estiblishTime = base_info.get("estiblishTime")
+            if not estiblishTime:
+                estiblishTime = 0
+            address = base_info.get("regLocation")
+            type = base_info.get("companyOrgType")
+            businessCode = base_info.get("creditCode")
+            tel = base_info.get("phoneNumber")
+            email = base_info.get("email")
+            industry = base_info.get("industry")
+            corporation = base_info.get("legalPersonName")
+            orgCode = base_info.get("orgNumber")
+
+            fromTime = base_info.get("fromTime")
+            if not fromTime:
+                fromTime = 0
+            toTime = base_info.get("toTime")
+            if not toTime:
+                toTime = 0
+            approvedTime = base_info.get("approvedTime")
+            if not approvedTime:
+                approvedTime = 0
+
+        else:
+            approvedTime = data.get("approvedTime")
+            businessScope = data.get("businessScope")
+            type = data.get("companyOrgType")
+            businessCode = data.get("creditCode")
+            email = data.get("email")
+            estiblishTime = data.get("estiblishTime")
+            if not estiblishTime:
+                estiblishTime = 0
+            fromTime = data.get("fromTime")
+            if not fromTime:
+                fromTime = 0
+            industry = data.get("industry")
+            corporation = data.get("legalPersonName")
+            name = data.get("name")
+            orgCode = data.get("orgNumber")
+            tel = data.get("phoneNumber")
+            regCapital = data.get("regCapital")
+            regInstitute = data.get("regInstitute")
+            address = data.get("regLocation")
+            regStatus = data.get("regStatus")
+            toTime = data.get("toTime")
+            if not toTime:
+                toTime = 0
         adminName = corporation
         adminTel = tel
         adminEmail = email
+
+        if not name:
+            while True:
+                try:
+                    mongo_conn = MongoClient("10.10.101.22", 27017)
+                    col = mongo_conn.spider.All_Company_Info
+                    col.update({"url": url}, {'$set': {"入库": "数据错误"}})
+                    mongo_conn.close()
+                    return
+                except Exception as e:
+                    print(sys._getframe().f_code.co_name, e)
 
         company = (
             name, businessCode, address, corporation, tel, type, industry, adminName, adminTel, adminEmail, orgCode,
@@ -110,12 +148,17 @@ class MongoToOracle:
 if __name__ == "__main__":
     import os
     os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
+    while True:
+        try:
+            mongo_to_oracle = MongoToOracle()
+            datas = mongo_to_oracle.get_mongo_data()
 
-    mongo_to_oracle = MongoToOracle()
-    datas = mongo_to_oracle.get_mongo_data()
+            # threadingpool = ThreadingPool(4)
+            # threadingpool.multi_process(mongo_to_oracle.data_to_oracle, datas)
 
-    threadingpool = ThreadingPool(20)
-    threadingpool.multi_process(mongo_to_oracle.data_to_oracle, datas)
+            for data in datas:
+                mongo_to_oracle.data_to_oracle(data)
+            break
+        except:
+            continue
 
-    # for data in datas:
-    #     mongo_to_oracle.data_to_oracle(data)
