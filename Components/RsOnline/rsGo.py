@@ -31,7 +31,7 @@ class RsGo:
                 self.proxy_pool.remove(self.proxy_ip)
         first_categories = bs_content.find_all(name="div", attrs={"class": "horizontalMenu sectionUp"})
         second_categories = []
-        for first_category in first_categories:
+        for first_category in (first_categories[0],):
             first_category_name = first_category.span.text
             ul_tags = first_category.find_all(name="ul", attrs={"class": "column1"})
             for ul_tag in ul_tags:
@@ -41,7 +41,7 @@ class RsGo:
                     second_category_name = li_tag.a.text.replace(li_tag.a.span.text, "").strip()
                     second_category = (first_category_name, second_category_name, second_category_url)
                     second_categories.append(second_category)
-        return second_categories
+        return second_categories[2:]
 
     def get_page_url(self, second_category):
         first_category_name, second_category_name, second_category_url = second_category
@@ -122,7 +122,11 @@ class RsGo:
             cc_attach = ""
         else:
             attach_name = attach_tag.get("onclick")
-            cc_attach = re.match(r"window\.open\('(.*?\.pdf)'\)", attach_name).group(1)
+            try:
+                cc_attach = re.match(r"window\.open\('(.*?\.pdf)'\)", attach_name).group(1)
+            except Exception as e:
+                print(sys._getframe().f_code.co_name, e)
+                cc_attach = ""
 
         component = (cc_code, cc_brandname, cc_unit, cc_kiname, cc_url, cc_attach, cc_img)
 
