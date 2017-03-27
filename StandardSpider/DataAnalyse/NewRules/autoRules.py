@@ -293,12 +293,19 @@ class DataProcessing:
                         flag = property_value_modify.double_with_unit(crawl_property_value)
                         flag1 = property_value_modify.single_with_unit(crawl_property_value)
                         if flag:
-                            pv_min, pv_max, base_property_unit = flag.group(1), flag.group(6), flag.group(4)
-                            save_value = pv_min + base_property_unit + '~' + pv_max + base_property_unit
-                            pv_id = spcap_data.save_to_property(pvc_propertyid, component_id, pvc_detno,
-                                                                "'" + save_value + "'", pv_max=pv_max,
-                                                                pv_min=pv_min,
-                                                                pv_unit="'" + base_property_unit + "'")
+                            pv_min, pv_max, base_property_unit, last_unit = flag.group(1), flag.group(6), flag.group(4), flag.group(9)
+                            if base_property_unit != last_unit:
+                                pv_id = spcap_data.save_to_property(pvc_propertyid, component_id,
+                                                                    pvc_detno,
+                                                                    "'" + original_crawl_property_value + "'",
+                                                                    pv_unit="'" + base_property_unit + "'",
+                                                                    pv_flag=10)
+                            else:
+                                save_value = pv_min + base_property_unit + '~' + pv_max + base_property_unit
+                                pv_id = spcap_data.save_to_property(pvc_propertyid, component_id, pvc_detno,
+                                                                    "'" + save_value + "'", pv_max=pv_max,
+                                                                    pv_min=pv_min,
+                                                                    pv_unit="'" + base_property_unit + "'")
                         elif flag1:
                             flag = flag1
                             pv_min, base_property_unit = flag.group(8), flag.group(12)

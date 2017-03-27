@@ -37,7 +37,7 @@ class PropertyValueModify:
 
 if __name__ == "__main__":
     propertyvaluemodify = PropertyValueModify()
-    print(propertyvaluemodify.double_with_unit("-16%~-20%").group(6))
+    print(propertyvaluemodify.double_with_unit("-16%~-20&^").group(9))
 
 # flag = re.match(r"^(\+/-)?((\+|-)?(\d+(\.\d+)?))(\D.*?)$", rough_val)
 #
