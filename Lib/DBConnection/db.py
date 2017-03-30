@@ -13,7 +13,7 @@ def kill_session():
     conn = OracleConnection()
     cursor = conn.conn.cursor()
     cursor.execute(
-        "select sess.sid,sess.serial#,lo.oracle_username,lo.os_user_name,ao.object_name,lo.locked_mode from v$locked_object lo, dba_objects ao, v$session sess where ao.object_id = lo.object_id and lo.session_id = sess.sid and os_user_name='RoyalClown'")
+        "select sess.sid,sess.serial#,lo.oracle_username,lo.os_user_name,ao.object_name,lo.locked_mode from v$locked_object lo, dba_objects ao, v$session sess where ao.object_id = lo.object_id and lo.session_id = sess.sid and os_user_name='zhanghy'")
     sessions = cursor.fetchall()
     for session in sessions:
         sid = session[0]

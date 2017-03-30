@@ -40,7 +40,8 @@ class BrandLogo:
             # if "https" in logo_url:
             #     return
             server_file_url = file_system.download_upload(logo_url, ".png")
-            self.update_local_url(server_file_url, br_id)
+            if server_file_url:
+                self.update_local_url(server_file_url, br_id)
 
         brand_logo_urls = self.get_download_urls()
         file_system = FileSystem()

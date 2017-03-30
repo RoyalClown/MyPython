@@ -24,6 +24,7 @@ class FileSystem:
         if not os.path.exists(download_dir_path):
             os.mkdir(download_dir_path)
         download_file_path = download_dir_path + str(random.random()) + file_type
+        try_count = 0
         while True:
             try:
                 html_analyse = HtmlAnalyse(url, proxy=self.proxy_ip)
@@ -32,11 +33,16 @@ class FileSystem:
                 break
             except Exception as e:
                 print(sys._getframe().f_code.co_name, e)
+                try_count += 1
+                if try_count > 2 and "https" in url:
+                    return
                 self.proxy_pool.remove(self.proxy_ip)
                 self.proxy_ip = self.proxy_pool.get()
         return download_file_path
 
     def file_upload(self, local_file_path):
+        if not local_file_path:
+            return
         with open(local_file_path, "rb") as f:
             res = requests.post(File_Server_Url, files={'file': f})
             res_j = res.json()

@@ -28,8 +28,8 @@ class MongoToOracle:
             try:
                 conn = cx_Oracle.connect(Manage_Oracle_Url)
                 cursor = conn.cursor()
-                company_id = cursor.execute("select AC$US$DETAIL_SEQ.nextval from dual").fetchone()[0]
-                sql_sentence = "insert into ac$us$detail(id, name, businessCode, address, corporation, tel, type, industry, " \
+                company_id = cursor.execute("select AC$US$DETAIL_COPY_SEQ.nextval from dual").fetchone()[0]
+                sql_sentence = "insert into ac$us$detail_copy(id, name, businessCode, address, corporation, tel, type, industry, " \
                                "adminName, adminTel, adminEmail, orgCode, email, fromTime, toTime, regStatus, approvedTime, " \
                                "estiblishTime, regCapital, businessScope, regInstitute, spider) values ({},'{}','{}','{}','{}','{}'," \
                                "'{}','{}','{}','{}','{}','{}','{}'," \
@@ -84,6 +84,8 @@ class MongoToOracle:
 
         else:
             approvedTime = data.get("approvedTime")
+            if not approvedTime:
+                approvedTime = 0
             businessScope = data.get("businessScope")
             type = data.get("companyOrgType")
             businessCode = data.get("creditCode")

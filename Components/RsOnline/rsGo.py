@@ -22,13 +22,14 @@ class RsGo:
     def get_second_category(self):
         while True:
             try:
-                self.proxy_ip = self.proxy_pool.get()
+
                 html_analyse = HtmlAnalyse("http://china.rs-online.com/web/c/pcb-prototyping/pcb-cleaning/", proxy=self.proxy_ip)
                 bs_content = html_analyse.get_bs_contents()
                 break
             except Exception as e:
                 print(sys._getframe().f_code.co_name, e)
                 self.proxy_pool.remove(self.proxy_ip)
+                self.proxy_ip = self.proxy_pool.get()
         first_categories = bs_content.find_all(name="div", attrs={"class": "horizontalMenu sectionUp"})
         second_categories = []
         for first_category in (first_categories[0],):
@@ -41,7 +42,7 @@ class RsGo:
                     second_category_name = li_tag.a.text.replace(li_tag.a.span.text, "").strip()
                     second_category = (first_category_name, second_category_name, second_category_url)
                     second_categories.append(second_category)
-        return second_categories[2:]
+        return second_categories
 
     def get_page_url(self, second_category):
         first_category_name, second_category_name, second_category_url = second_category
@@ -53,16 +54,7 @@ class RsGo:
             third_category_name = third_category_tag.a.text
             third_category_url = Rs_Pre_Url + third_category_tag.a.get("href")
             html_analyse = HtmlAnalyse(third_category_url)
-            data = {
-                "AJAXREQUEST": "_viewRoot",
-                "j_id2275": "j_id2275",
-                "ajax-dimensions": "",
-                "ajax-request": "true",
-                "ajax-sort-by": "ajax-sort-order",
-                "ajax-attrSort": "false",
-                "javax.faces.ViewState": "j_id1",
-                "j_id2275:j_id2277": "j_id2275:j_id2277",
-            }
+
             bs_content = html_analyse.get_bs_contents()
             page_tag = bs_content.find(name="div", attrs={"class": "viewProdDiv"}).text
             flag = re.match(r".*?共(.*?)个", page_tag)
@@ -71,24 +63,27 @@ class RsGo:
                 page_url = third_category_url + "?pn=" + str(page_num + 1)
                 while True:
                     try:
+
                         html_analyse = HtmlAnalyse(page_url, proxy=self.proxy_ip)
                         bs_content = html_analyse.get_bs_contents()
                         break
                     except Exception as e:
                         print(sys._getframe().f_code.co_name, e)
                         self.proxy_pool.remove(self.proxy_ip)
+                        self.proxy_ip = self.proxy_pool.get()
                 component_url_tags = bs_content.find_all(name="a", attrs={"class": "tnProdDesc"})
                 page_attributes = []
                 for component_url_tag in component_url_tags:
                     component_url = Rs_Pre_Url + component_url_tag.get("href")
-                    page_attribute = (first_category_name, second_category_name, component_url)
+                    union_category_name = second_category_name + "---" + third_category_name
+                    page_attribute = (first_category_name, union_category_name, component_url)
                     page_attributes.append(page_attribute)
                 #
-                threadingpool = ThreadingPool(4)
-                threadingpool.multi_process(self.thread_go, page_attributes)
+                # threadingpool = ThreadingPool(4)
+                # threadingpool.multi_process(self.thread_go, page_attributes)
 
-                # for page_attribute in page_attributes:
-                #     self.thread_go(page_attribute)
+                for page_attribute in page_attributes:
+                    self.thread_go(page_attribute)
 
             continue
 

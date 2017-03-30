@@ -355,7 +355,6 @@ class DataProcessing:
                     pv_id = spcap_data.save_to_property(pvc_propertyid, component_id,
                                                         pvc_detno,
                                                         "'" + original_crawl_property_value + "'",
-                                                        pv_unit="'" + base_property_unit + "'",
                                                         pv_flag=10)
 
             if not cc_flag:
