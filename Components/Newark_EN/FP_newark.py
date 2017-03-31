@@ -8,6 +8,8 @@ import re
 import requests
 import sys
 from bs4 import BeautifulSoup
+
+from Components.DBSAVE.oracleSave import OracleSave
 from Lib.NetCrawl.Constant import Default_Header
 from Lib.NetCrawl.HtmlAnalyse import HtmlAnalyse
 from Lib.NetCrawl.Proxy_Pool import ProxyPool
@@ -114,13 +116,82 @@ class FPNewark:
                 f.write(line.encode().decode())
 
     def thread_go(self, category_tree):
-        cc_kiname = category_tree[0]
-        categories = category_tree[1:-2]
+        first_category_name = category_tree[0]
+        second_category_name = str(category_tree[1:-2])
         url, component_count = category_tree[-2:]
         page_count = int(int(component_count) / 25) + 1
-        while True:
-            try:
-                html_analyse = HtmlAnalyse(url)
+        for page_num in range(1, page_count + 1):
+            page_url = url + "/prl/results/" + str(page_num)
+            while True:
+                try:
+                    res = self.my_session.get(page_url, timeout=20)
+                    if res.status_code != 200:
+                        print(res.status_code)
+                        # self.proxy_pool.remove(self.proxy_ip)
+                        continue
+                    bs_content = BeautifulSoup(res.content, "lxml")
+                    break
+                except Exception as e:
+                    print(sys._getframe().f_code.co_name, e)
+            component_tags = bs_content.find(name="table", id="sProdList").tbody.find_all(name="tr")
+            for component_tag in component_tags:
+                detail_table = component_tag.find(name="table", attrs={"class": "TFtable"})
+                td_tags = component_tag.find_all(name="td")
+                try:
+                    component_code = td_tags[1].text.strip()
+                except Exception as e:
+                    print(sys._getframe().f_code.co_name, e)
+                    continue
+                try:
+                    component_img = td_tags[1].find(name="img", attrs={"class": "productThumbnail"}).get("src")
+                except:
+                    component_img = ""
+                try:
+                    rough_attach = td_tags[2].find(name="a", text="数据表")
+                    if not rough_attach:
+                        rough_attach = td_tags[2].find(name="a", attrs={"class": "prodDetailsAttachment"})
+                    component_attach = rough_attach.get("href")
+                    if "http" not in component_attach:
+                        component_attach = ""
+                except Exception as e:
+                    print("component_attach is null!!")
+                    component_attach = ""
+                    if not component_img:
+                        continue
+                try:
+                    manufacture_description = td_tags[3].a.find_all(name="p")
+                    component_brand = manufacture_description[0].text.strip()
+                    component_description = manufacture_description[1].text.strip()
+                except Exception as e:
+                    print(sys._getframe().f_code.co_name, e)
+                    continue
+
+                component = (
+                    component_code, component_brand, first_category_name, second_category_name, page_url,
+                    component_attach,
+                    component_img)
+                count = 0
+                while True:
+                    try:
+                        orcl_conn = OracleSave(1000003)
+                        orcl_conn.component_insert(component)
+
+                        property_tags = detail_table.find_all(name="tr")
+                        for property_tag in property_tags:
+                            detail_td_tags = property_tag.find_all("td")
+                            property_name = detail_td_tags[0].text.strip()
+                            property_value = detail_td_tags[1].text.strip()
+                            key_value = (property_name, property_value)
+                            orcl_conn.properties_insert(key_value)
+                        # orcl_conn.commit()
+                        orcl_conn.conn.close()
+
+                        break
+                    except Exception as e:
+                        print(e)
+                        count += 1
+                        if count > 3:
+                            break
 
 if __name__ == "__main__":
     fp_newark = FPNewark()
@@ -128,9 +199,9 @@ if __name__ == "__main__":
     multi_category_trees = fp_newark.get_category_trees(initial_category_trees)
     print(multi_category_trees)
     fp_newark.csv_write(multi_category_trees)
+    for category_tree in multi_category_trees:
+        fp_newark.thread_go(category_tree)
 
 """
-    1. 完成rs-online的抓取规则设计，已开始抓取，但目前速度较慢
-    2. 整体修改newark类目结构抓取的程序，使之能够全面正确抓取所有类目。
-    3. 修改
+
 """

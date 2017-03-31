@@ -47,22 +47,7 @@ class NameClient:
         return r.content
 
     def login(self, email, password, captcha=None):
-        """登陆.
 
-        :param str email: 邮箱
-        :param str password: 密码
-        :param str captcha: 验证码, 默认为None，表示不提交验证码
-        :return:
-            ======== ======== ============== ====================
-            元素序号 元素类型 意义           说明
-            ======== ======== ============== ====================
-            0        int      是否成功       0为成功，1为失败
-            1        str      失败原因       登录成功则为空字符串
-            2        str       cookies字符串 登录失败则为空字符串
-            ======== ======== ============== ====================
-
-        :rtype: (int, str, str)
-        """
         data = {'email': email, 'password': password,
                 'remember_me': 'true'}
         if captcha is not None:
@@ -76,18 +61,7 @@ class NameClient:
         return code, message, cookies_str
 
     def login_with_cookies(self, cookies):
-        """使用cookies文件或字符串登录
 
-        :param str cookies:
-            ============== ===========================
-            参数形式       作用
-            ============== ===========================
-            文件名         将文件内容作为cookies字符串
-            cookies 字符串  直接提供cookies字符串
-            ============== ===========================
-        :return: 无
-        :rtype: None
-        """
         if os.path.isfile(cookies):
             with open(cookies) as f:
                 cookies = f.read()
@@ -95,14 +69,7 @@ class NameClient:
         self._session.cookies.update(cookies_dict)
 
     def login_in_terminal(self, need_captcha=False, use_getpass=True):
-        """不使用cookies，在终端中根据提示登陆
 
-        :param bool need_captcha: 是否要求输入验证码，如果登录失败请设为 True
-        :param bool use_getpass: 是否使用安全模式输入密码，默认为 True，
-            如果在某些 Windows IDE 中无法正常输入密码，请把此参数设置为 False 试试
-        :return: 如果成功返回cookies字符串
-        :rtype: str
-        """
         print('====== login =====')
 
         email = input('email: ')
@@ -134,14 +101,7 @@ class NameClient:
         return cookies
 
     def create_cookies(self, file, need_captcha=False, use_getpass=True):
-        """在终端中执行登录流程，将 cookies 存放在文件中以便后续使用
 
-        :param str file: 文件名
-        :param bool need_captcha: 登录过程中是否使用验证码， 默认为 False
-        :param bool use_getpass: 是否使用安全模式输入密码，默认为 True，
-            如果在某些 Windows IDE 中无法正常输入密码，请把此参数设置为 False 试试
-        :return:
-        """
         cookies_str = self.login_in_terminal(need_captcha, use_getpass)
         if cookies_str:
             with open(file, 'w') as f:
@@ -153,31 +113,11 @@ class NameClient:
     # ===== network staff =====
 
     def set_proxy(self, proxy):
-        """设置代理
 
-        :param str proxy: 使用 "http://example.com:port" 的形式
-        :return: 无
-        :rtype: None
-
-        :说明:
-            由于一个 :class:`.Client` 对象和它创建出来的其他对象共用
-            一个Session，所以调用这个方法也会将所有生成出的类设置上代理。
-        """
         self._session.proxies.update({'http': proxy})
 
     def set_proxy_pool(self, proxies, auth=None, https=True):
-        """设置代理池
 
-        :param proxies: proxy列表, 形如 ``["ip1:port1", "ip2:port2"]``
-        :param auth: 如果代理需要验证身份, 通过这个参数提供, 比如
-        :param https: 默认为 True, 传入 False 则不设置 https 代理
-        .. code-block:: python
-
-              from requests.auth import HTTPProxyAuth
-              auth = HTTPProxyAuth('laike9m', '123')
-        :说明:
-             每次 GET/POST 请求会随机选择列表中的代理
-        """
         from random import choice
 
         if https:

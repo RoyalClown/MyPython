@@ -28,7 +28,6 @@ class RsGo:
                 break
             except Exception as e:
                 print(sys._getframe().f_code.co_name, e)
-                self.proxy_pool.remove(self.proxy_ip)
                 self.proxy_ip = self.proxy_pool.get()
         first_categories = bs_content.find_all(name="div", attrs={"class": "horizontalMenu sectionUp"})
         second_categories = []
@@ -42,20 +41,34 @@ class RsGo:
                     second_category_name = li_tag.a.text.replace(li_tag.a.span.text, "").strip()
                     second_category = (first_category_name, second_category_name, second_category_url)
                     second_categories.append(second_category)
-        return second_categories
+        return second_categories[1:]
 
     def get_page_url(self, second_category):
         first_category_name, second_category_name, second_category_url = second_category
-        html_analyse = HtmlAnalyse(second_category_url)
-        bs_content = html_analyse.get_bs_contents()
+        while True:
+            try:
+                html_analyse = HtmlAnalyse(second_category_url, proxy=self.proxy_ip)
+                bs_content = html_analyse.get_bs_contents()
+                break
+            except Exception as e:
+                print(sys._getframe().f_code.co_name, e)
+                self.proxy_ip = self.proxy_pool.get()
+
         ul_tag = bs_content.find(name="ul", attrs={"class": "brcategories"})
         third_category_tags = ul_tag.find_all(name="div", attrs={"class": "rsGARealEstate"})
         for third_category_tag in third_category_tags:
             third_category_name = third_category_tag.a.text
             third_category_url = Rs_Pre_Url + third_category_tag.a.get("href")
-            html_analyse = HtmlAnalyse(third_category_url)
 
-            bs_content = html_analyse.get_bs_contents()
+            while True:
+                try:
+                    html_analyse = HtmlAnalyse(third_category_url, proxy=self.proxy_ip)
+
+                    bs_content = html_analyse.get_bs_contents()
+                    break
+                except Exception as e:
+                    print(sys._getframe().f_code.co_name, e)
+                    self.proxy_ip = self.proxy_pool.get()
             page_tag = bs_content.find(name="div", attrs={"class": "viewProdDiv"}).text
             flag = re.match(r".*?共(.*?)个", page_tag)
             page_count = int(int(flag.group(1).strip()) / 20 + 1)
@@ -69,7 +82,6 @@ class RsGo:
                         break
                     except Exception as e:
                         print(sys._getframe().f_code.co_name, e)
-                        self.proxy_pool.remove(self.proxy_ip)
                         self.proxy_ip = self.proxy_pool.get()
                 component_url_tags = bs_content.find_all(name="a", attrs={"class": "tnProdDesc"})
                 page_attributes = []
@@ -79,11 +91,11 @@ class RsGo:
                     page_attribute = (first_category_name, union_category_name, component_url)
                     page_attributes.append(page_attribute)
                 #
-                # threadingpool = ThreadingPool(4)
-                # threadingpool.multi_process(self.thread_go, page_attributes)
+                threadingpool = ThreadingPool(4)
+                threadingpool.multi_process(self.thread_go, page_attributes)
 
-                for page_attribute in page_attributes:
-                    self.thread_go(page_attribute)
+                # for page_attribute in page_attributes:
+                #     self.thread_go(page_attribute)
 
             continue
 
@@ -126,20 +138,27 @@ class RsGo:
         component = (cc_code, cc_brandname, cc_unit, cc_kiname, cc_url, cc_attach, cc_img)
 
         # 器件属性
-        orcl_conn = OracleSave(1000005)
-        orcl_conn.component_insert(component)
-        component_properties = []
-        tr_tags = bs_content.find_all(name="tr", attrs={"class": re.compile(r"dr-table-row")})
-        for tr_tag in tr_tags:
-            td_tags = tr_tag.find_all(name="td")
-            parameter_name = td_tags[1].text
-            parameter_value = td_tags[2].text
-            component_property = (parameter_name, parameter_value)
-            component_properties.append(component_property)
+        while True:
+            try:
+                orcl_conn = OracleSave(1000005)
+                orcl_conn.component_insert(component)
+                component_properties = []
+                tr_tags = bs_content.find_all(name="tr", attrs={"class": re.compile(r"dr-table-row")})
+                for tr_tag in tr_tags:
+                    td_tags = tr_tag.find_all(name="td")
+                    parameter_name = td_tags[1].text
+                    parameter_value = td_tags[2].text
+                    component_property = (parameter_name, parameter_value)
+                    component_properties.append(component_property)
 
-            orcl_conn.properties_insert(component_property)
-        orcl_conn.commit()
-        orcl_conn.conn.close()
+                    orcl_conn.properties_insert(component_property)
+                orcl_conn.commit()
+                orcl_conn.conn.close()
+                break
+            except Exception as e:
+                print(sys._getframe().f_code.co_name, e)
+            finally:
+                orcl_conn.conn.close()
 
 
 if __name__ == "__main__":

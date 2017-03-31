@@ -44,7 +44,6 @@ def all_together():
             except Exception as e:
                 print("出错，请重试", e)
 
-
         elif choice == '0':
             break
 

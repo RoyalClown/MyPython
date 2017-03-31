@@ -92,11 +92,11 @@ class PdfDownload:
             filename = self.download(pdfurl)
             self.upload(filename, pdfurl)
 
-        threading_pool = ThreadingPool(8)
+        threading_pool = ThreadingPool()
         threading_pool.multi_thread(thread, pdf_urls)
 
 
 if __name__ == "__main__":
-    pdfdownload = PdfDownload(task_code="CCT2017020700000001")
+    pdfdownload = PdfDownload(task_code="CCT2017032900000003")
 
     pdfdownload.thread_go()

@@ -3,10 +3,6 @@ from multiprocessing.dummy import Pool as ThreadPool
 
 import time
 
-"""
-IO 密集型任务选择multiprocessing.dummy，CPU 密集型任务选择multiprocessing
-"""
-
 
 class ThreadingPool:
     def __init__(self, num):
