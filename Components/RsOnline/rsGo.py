@@ -153,7 +153,6 @@ class RsGo:
 
                     orcl_conn.properties_insert(component_property)
                 orcl_conn.commit()
-                orcl_conn.conn.close()
                 break
             except Exception as e:
                 print(sys._getframe().f_code.co_name, e)
