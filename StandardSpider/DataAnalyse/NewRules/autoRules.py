@@ -195,6 +195,10 @@ class DataProcessing:
                 insert_or_update = 1
                 uuid = component[-1]
                 cmp_old_version = component[21]
+                if not b2c_attach or b2c_attach == "None":
+                    b2c_attach = component[1]
+                if not b2c_img or b2c_img == "None":
+                    b2c_img = component[4]
                 if cmp_old_version is None:
                     cmp_version = 1
                 else:
@@ -293,7 +297,8 @@ class DataProcessing:
                         flag = property_value_modify.double_with_unit(crawl_property_value)
                         flag1 = property_value_modify.single_with_unit(crawl_property_value)
                         if flag:
-                            pv_min, pv_max, base_property_unit, last_unit = flag.group(1), flag.group(6), flag.group(4), flag.group(9)
+                            pv_min, pv_max, base_property_unit, last_unit = flag.group(1), flag.group(6), flag.group(
+                                4), flag.group(9)
                             if base_property_unit != last_unit:
                                 pv_id = spcap_data.save_to_property(pvc_propertyid, component_id,
                                                                     pvc_detno,
@@ -363,8 +368,9 @@ class DataProcessing:
                                          cc_modify=cc_modify)
             spcap_data.conn.commit()
             print("come on")
+        spcap_data.conn.close()
 
 
 if __name__ == "__main__":
-    main = DataProcessing("CCT2017020700000001")
+    main = DataProcessing("CCT2016121600000013")
     main.go()

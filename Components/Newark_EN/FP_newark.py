@@ -28,7 +28,6 @@ class FPNewark:
             url = category_tree[-2]
             while True:
                 try:
-                    self.proxy_ip = self.proxy_pool.get()
                     self.my_session.proxies.update(self.proxy_ip)
                     res = self.my_session.get(url, timeout=20)
                     if res.status_code != 200:
@@ -40,9 +39,12 @@ class FPNewark:
                     break
                 except Exception as e:
                     print(sys._getframe().f_code.co_name, url, e)
+                    self.proxy_pool.remove(self.proxy_ip)
+                    self.proxy_ip = self.proxy_pool.get()
 
             category_list = bs_content.find(name="ul", attrs={"class": "categoryList"})
             if not category_list:
+                print(category_tree)
                 multi_category_trees.append(category_tree)
                 continue
             else:
@@ -64,7 +66,9 @@ class FPNewark:
                     child_category_tree = list(category_tree)[:-2] + child_category
                     category_trees.append(child_category_tree)
                 child_categories = self.get_category_trees(category_trees)
+                print(child_categories)
                 multi_category_trees += child_categories
+            print("Current Count： ", len(multi_category_trees))
         return multi_category_trees
 
     def get_first_categories(self):
@@ -74,8 +78,6 @@ class FPNewark:
         my_headers["Upgrade-Insecure-Requests"] = "1"
         while True:
             try:
-                self.proxy_ip = self.proxy_pool.get()
-
                 self.my_session.headers.update(my_headers)
                 self.my_session.proxies.update(self.proxy_ip)
 
@@ -88,6 +90,9 @@ class FPNewark:
                 break
             except Exception as e:
                 print(sys._getframe().f_code.co_name, e)
+                self.proxy_pool.remove(self.proxy_ip)
+                self.proxy_ip = self.proxy_pool.get()
+
         second_pages = []
         for first_category_tag in first_category_tags:
             first_category_name = first_category_tag.li.h2.text.strip()
@@ -114,7 +119,7 @@ class FPNewark:
                     modify_category_structure.append(modify_structure_name)
                 line = (",".join(modify_category_structure)) + "\n"
                 f.write(line.encode().decode())
-
+    #
     def thread_go(self, category_tree):
         first_category_name = category_tree[0]
         second_category_name = str(category_tree[1:-2])
@@ -127,12 +132,16 @@ class FPNewark:
                     res = self.my_session.get(page_url, timeout=20)
                     if res.status_code != 200:
                         print(res.status_code)
-                        # self.proxy_pool.remove(self.proxy_ip)
+                        self.proxy_pool.remove(self.proxy_ip)
+                        self.proxy_ip = self.proxy_pool.get()
                         continue
                     bs_content = BeautifulSoup(res.content, "lxml")
                     break
                 except Exception as e:
                     print(sys._getframe().f_code.co_name, e)
+                    self.proxy_pool.remove(self.proxy_ip)
+                    self.proxy_ip = self.proxy_pool.get()
+
             component_tags = bs_content.find(name="table", id="sProdList").tbody.find_all(name="tr")
             for component_tag in component_tags:
                 detail_table = component_tag.find(name="table", attrs={"class": "TFtable"})
@@ -183,7 +192,7 @@ class FPNewark:
                             property_value = detail_td_tags[1].text.strip()
                             key_value = (property_name, property_value)
                             orcl_conn.properties_insert(key_value)
-                        # orcl_conn.commit()
+                        orcl_conn.commit()
                         orcl_conn.conn.close()
 
                         break
@@ -198,10 +207,7 @@ if __name__ == "__main__":
     initial_category_trees = fp_newark.get_first_categories()
     multi_category_trees = fp_newark.get_category_trees(initial_category_trees)
     print(multi_category_trees)
-    fp_newark.csv_write(multi_category_trees)
+    # fp_newark.csv_write(multi_category_trees)
     for category_tree in multi_category_trees:
         fp_newark.thread_go(category_tree)
 
-"""
-
-"""

@@ -31,7 +31,7 @@ class RsGo:
                 self.proxy_ip = self.proxy_pool.get()
         first_categories = bs_content.find_all(name="div", attrs={"class": "horizontalMenu sectionUp"})
         second_categories = []
-        for first_category in (first_categories[0],):
+        for first_category in first_categories:
             first_category_name = first_category.span.text
             ul_tags = first_category.find_all(name="ul", attrs={"class": "column1"})
             for ul_tag in ul_tags:
@@ -41,7 +41,7 @@ class RsGo:
                     second_category_name = li_tag.a.text.replace(li_tag.a.span.text, "").strip()
                     second_category = (first_category_name, second_category_name, second_category_url)
                     second_categories.append(second_category)
-        return second_categories[1:]
+        return second_categories
 
     def get_page_url(self, second_category):
         first_category_name, second_category_name, second_category_url = second_category
@@ -159,9 +159,63 @@ class RsGo:
             finally:
                 orcl_conn.conn.close()
 
+    def csv_write(self, category_structures):
+        with open("..\\Rs-online.csv", "w", encoding="utf-8") as f:
+            for category_structure in category_structures:
+                modify_category_structure = []
+                for structure_name in category_structure:
+                    modify_structure_name = structure_name.replace(",", "，")
+                    modify_category_structure.append(modify_structure_name)
+                line = (",".join(modify_category_structure)) + "\n"
+                f.write(line.encode().decode())
+
+    def get_csv_categories(self):
+        while True:
+            try:
+                html_analyse = HtmlAnalyse("http://china.rs-online.com/web/c/pcb-prototyping/pcb-cleaning/", proxy=self.proxy_ip)
+                bs_content = html_analyse.get_bs_contents()
+                break
+            except Exception as e:
+                print(sys._getframe().f_code.co_name, e)
+                self.proxy_pool.remove(self.proxy_ip)
+                self.proxy_ip = self.proxy_pool.get()
+        first_categories = bs_content.find_all(name="div", attrs={"class": "horizontalMenu sectionUp"})
+        third_categories = []
+        for first_category in first_categories:
+            first_category_name = first_category.span.text
+            ul_tags = first_category.find_all(name="ul", attrs={"class": "column1"})
+            for ul_tag in ul_tags:
+                li_tags = ul_tag.find_all(name="li")
+                for li_tag in li_tags:
+                    second_category_url = Rs_Pre_Url + li_tag.a.get("href")
+                    second_category_name = li_tag.a.text.replace(li_tag.a.span.text, "").strip()
+                    while True:
+                        try:
+                            html_analyse = HtmlAnalyse(second_category_url, proxy=self.proxy_ip)
+                            bs_content = html_analyse.get_bs_contents()
+                            ul_tag = bs_content.find(name="ul", attrs={"class": "brcategories"})
+
+                            break
+                        except Exception as e:
+                            print(sys._getframe().f_code.co_name, e, second_category_url)
+                            self.proxy_pool.remove(self.proxy_ip)
+                            self.proxy_ip = self.proxy_pool.get()
+                    if ul_tag:
+                        third_category_tags = ul_tag.find_all(name="div", attrs={"class": "rsGARealEstate"})
+                        for third_category_tag in third_category_tags:
+                            third_category_name = third_category_tag.a.text
+                            third_category_url = Rs_Pre_Url + third_category_tag.a.get("href")
+                            third_category = (first_category_name, second_category_name, third_category_name, third_category_url)
+                            print(third_category)
+                            third_categories.append(third_category)
+                    else:
+                        third_category = (first_category_name, second_category_name, second_category_name, second_category_url)
+                        print(third_category)
+                        third_categories.append(third_category)
+        return third_categories
+
 
 if __name__ == "__main__":
     rs_go = RsGo()
-    second_categories = rs_go.get_second_category()
-    for second_category in second_categories:
-        rs_go.get_page_url(second_category)
+    csv_categories = rs_go.get_csv_categories()
+    rs_go.csv_write(csv_categories)
