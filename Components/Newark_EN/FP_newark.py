@@ -3,6 +3,7 @@
     @author:        RoyalClown
     @date:          2017/3/29
 """
+import csv
 import re
 
 import requests
@@ -10,6 +11,7 @@ import sys
 from bs4 import BeautifulSoup
 
 from Components.DBSAVE.oracleSave import OracleSave
+from Lib.Currency.ThreadingPool import ThreadingPool
 from Lib.NetCrawl.Constant import Default_Header
 from Lib.NetCrawl.HtmlAnalyse import HtmlAnalyse
 from Lib.NetCrawl.Proxy_Pool import ProxyPool
@@ -121,6 +123,10 @@ class FPNewark:
                 f.write(line.encode().decode())
     #
     def thread_go(self, category_tree):
+        my_headers = Default_Header
+        my_headers["host"] = "www.newark.com"
+        my_headers["Referer"] = "http://www.newark.com/"
+        my_headers["Upgrade-Insecure-Requests"] = "1"
         first_category_name = category_tree[0]
         second_category_name = str(category_tree[1:-2])
         url, component_count = category_tree[-2:]
@@ -129,6 +135,8 @@ class FPNewark:
             page_url = url + "/prl/results/" + str(page_num)
             while True:
                 try:
+                    self.my_session.headers.update(my_headers)
+                    self.my_session.proxies.update(self.proxy_ip)
                     res = self.my_session.get(page_url, timeout=20)
                     if res.status_code != 200:
                         print(res.status_code)
@@ -136,20 +144,20 @@ class FPNewark:
                         self.proxy_ip = self.proxy_pool.get()
                         continue
                     bs_content = BeautifulSoup(res.content, "lxml")
+                    component_tags = bs_content.find(name="table", id="sProdList").tbody.find_all(name="tr")
                     break
                 except Exception as e:
                     print(sys._getframe().f_code.co_name, e)
                     self.proxy_pool.remove(self.proxy_ip)
                     self.proxy_ip = self.proxy_pool.get()
 
-            component_tags = bs_content.find(name="table", id="sProdList").tbody.find_all(name="tr")
             for component_tag in component_tags:
                 detail_table = component_tag.find(name="table", attrs={"class": "TFtable"})
                 td_tags = component_tag.find_all(name="td")
                 try:
                     component_code = td_tags[1].text.strip()
                 except Exception as e:
-                    print(sys._getframe().f_code.co_name, e)
+                    print("component code is None", e)
                     continue
                 try:
                     component_img = td_tags[1].find(name="img", attrs={"class": "productThumbnail"}).get("src")
@@ -163,7 +171,6 @@ class FPNewark:
                     if "http" not in component_attach:
                         component_attach = ""
                 except Exception as e:
-                    print("component_attach is null!!")
                     component_attach = ""
                     if not component_img:
                         continue
@@ -184,14 +191,14 @@ class FPNewark:
                     try:
                         orcl_conn = OracleSave(1000003)
                         orcl_conn.component_insert(component)
-
-                        property_tags = detail_table.find_all(name="tr")
-                        for property_tag in property_tags:
-                            detail_td_tags = property_tag.find_all("td")
-                            property_name = detail_td_tags[0].text.strip()
-                            property_value = detail_td_tags[1].text.strip()
-                            key_value = (property_name, property_value)
-                            orcl_conn.properties_insert(key_value)
+                        if detail_table:
+                            property_tags = detail_table.find_all(name="tr")
+                            for property_tag in property_tags:
+                                detail_td_tags = property_tag.find_all("td")
+                                property_name = detail_td_tags[0].text.strip()
+                                property_value = detail_td_tags[1].text.strip()
+                                key_value = (property_name, property_value)
+                                orcl_conn.properties_insert(key_value)
                         orcl_conn.commit()
                         orcl_conn.conn.close()
 
@@ -199,15 +206,27 @@ class FPNewark:
                     except Exception as e:
                         print(e)
                         count += 1
-                        if count > 3:
-                            break
+                        # if count > 3:
+                        #     break
+
+    def read_from_csv(self):
+        csv_categories = []
+        with open("..\\Newark_test.csv", "r", encoding="utf-8") as f:
+            read = csv.reader(f)
+            for line in read:
+                print(line)
+                csv_categories.append(line)
+        return csv_categories
 
 if __name__ == "__main__":
     fp_newark = FPNewark()
-    initial_category_trees = fp_newark.get_first_categories()
-    multi_category_trees = fp_newark.get_category_trees(initial_category_trees)
-    print(multi_category_trees)
+    # initial_category_trees = fp_newark.get_first_categories()
+    # multi_category_trees = fp_newark.get_category_trees(initial_category_trees)
+    # print(multi_category_trees)
     # fp_newark.csv_write(multi_category_trees)
-    for category_tree in multi_category_trees:
-        fp_newark.thread_go(category_tree)
+    multi_category_trees = fp_newark.read_from_csv()
+    threadingpool = ThreadingPool(8)
+    threadingpool.multi_process(fp_newark.thread_go, multi_category_trees)
+    # for category_tree in multi_category_trees:
+    #     fp_newark.thread_go(category_tree)
 

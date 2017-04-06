@@ -69,7 +69,11 @@ class RsGo:
                 except Exception as e:
                     print(sys._getframe().f_code.co_name, e)
                     self.proxy_ip = self.proxy_pool.get()
-            page_tag = bs_content.find(name="div", attrs={"class": "viewProdDiv"}).text
+            try:
+                page_tag = bs_content.find(name="div", attrs={"class": "viewProdDiv"}).text
+            except Exception as e:
+                print(third_category_url, e, "找不到page_tag")
+                continue
             flag = re.match(r".*?共(.*?)个", page_tag)
             page_count = int(int(flag.group(1).strip()) / 20 + 1)
             for page_num in range(int(page_count)):
@@ -217,5 +221,6 @@ class RsGo:
 
 if __name__ == "__main__":
     rs_go = RsGo()
-    csv_categories = rs_go.get_csv_categories()
-    rs_go.csv_write(csv_categories)
+    second_categories = rs_go.get_second_category()
+    for second_category in second_categories:
+        rs_go.get_page_url(second_category)
