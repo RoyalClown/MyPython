@@ -28,21 +28,23 @@ class FPNewark:
         multi_category_trees = []
         for category_tree in category_trees:
             url = category_tree[-2]
+            count = 0
             while True:
                 try:
                     self.my_session.proxies.update(self.proxy_ip)
                     res = self.my_session.get(url, timeout=20)
                     if res.status_code != 200:
                         print(res.status_code)
-                        self.proxy_pool.remove(self.proxy_ip)
                         continue
                     bs_content = BeautifulSoup(res.content, "lxml")
 
                     break
                 except Exception as e:
+                    count += 1
                     print(sys._getframe().f_code.co_name, url, e)
-                    self.proxy_pool.remove(self.proxy_ip)
                     self.proxy_ip = self.proxy_pool.get()
+                    if count > 100:
+                        self.proxy_pool._refresh()
 
             category_list = bs_content.find(name="ul", attrs={"class": "categoryList"})
             if not category_list:
@@ -91,8 +93,7 @@ class FPNewark:
                 first_category_tags = bs_content.find_all(name="ul", attrs={"categoryList"})
                 break
             except Exception as e:
-                print(sys._getframe().f_code.co_name, e)
-                self.proxy_pool.remove(self.proxy_ip)
+                print("Part1",sys._getframe().f_code.co_name, e)
                 self.proxy_ip = self.proxy_pool.get()
 
         second_pages = []
@@ -133,6 +134,7 @@ class FPNewark:
         page_count = int(int(component_count) / 25) + 1
         for page_num in range(1, page_count + 1):
             page_url = url + "/prl/results/" + str(page_num)
+            count = 0
             while True:
                 try:
                     self.my_session.headers.update(my_headers)
@@ -147,9 +149,11 @@ class FPNewark:
                     component_tags = bs_content.find(name="table", id="sProdList").tbody.find_all(name="tr")
                     break
                 except Exception as e:
+                    count += 1
                     print(sys._getframe().f_code.co_name, e)
-                    self.proxy_pool.remove(self.proxy_ip)
                     self.proxy_ip = self.proxy_pool.get()
+                    if count > 100:
+                        self.proxy_pool._refresh()
 
             for component_tag in component_tags:
                 detail_table = component_tag.find(name="table", attrs={"class": "TFtable"})

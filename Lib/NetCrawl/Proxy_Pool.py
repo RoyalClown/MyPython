@@ -11,8 +11,8 @@ class ProxyPool:
     def __init__(self):
         self._refreshing = False
         self._refresh()
-        timer = Timer(300, self._refresh)
-        timer.start()
+        # timer = Timer(300, self._refresh)
+        # timer.start()
 
     def _refresh(self):
         if self._refreshing:
