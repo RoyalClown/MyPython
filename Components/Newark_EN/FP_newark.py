@@ -132,7 +132,7 @@ class FPNewark:
         second_category_name = str(category_tree[1:-2])
         url, component_count = category_tree[-2:]
         page_count = int(int(component_count) / 25) + 1
-        for page_num in range(1, page_count + 1):
+        for page_num in range(877, page_count + 1):
             page_url = url + "/prl/results/" + str(page_num)
             count = 0
             while True:
@@ -152,6 +152,11 @@ class FPNewark:
                     count += 1
                     print(sys._getframe().f_code.co_name, e)
                     self.proxy_ip = self.proxy_pool.get()
+                    if count > 10:
+                        print(category_tree, page_url)
+                        component_tags = []
+                        break
+
                     if count > 100:
                         self.proxy_pool._refresh()
 
@@ -176,15 +181,17 @@ class FPNewark:
                         component_attach = ""
                 except Exception as e:
                     component_attach = ""
-                    if not component_img:
-                        continue
                 try:
                     manufacture_description = td_tags[3].a.find_all(name="p")
                     component_brand = manufacture_description[0].text.strip()
                     component_description = manufacture_description[1].text.strip()
                 except Exception as e:
+                    component_brand = ""
                     print(sys._getframe().f_code.co_name, e)
                     continue
+                if not component_img and not component_attach and not component_brand:
+                    continue
+
 
                 component = (
                     component_code, component_brand, first_category_name, second_category_name, page_url,
@@ -213,6 +220,106 @@ class FPNewark:
                         # if count > 3:
                         #     break
 
+    def extra_go(self, category_tree):
+        my_headers = Default_Header
+        my_headers["host"] = "www.newark.com"
+        my_headers["Referer"] = "http://www.newark.com/"
+        my_headers["Upgrade-Insecure-Requests"] = "1"
+        first_category_name = category_tree[0]
+        second_category_name = str(category_tree[1:-2])
+        url, component_count = category_tree[-2:]
+        page_count = int(int(component_count) / 25) + 1
+        page_range = range(875, 17557)
+        def extra_thread(page_num):
+            page_url = url + "/prl/results/" + str(page_num)
+            count = 0
+            while True:
+                try:
+                    self.my_session.headers.update(my_headers)
+                    self.my_session.proxies.update(self.proxy_ip)
+                    res = self.my_session.get(page_url, timeout=20)
+                    if res.status_code != 200:
+                        print(res.status_code)
+                        self.proxy_pool.remove(self.proxy_ip)
+                        self.proxy_ip = self.proxy_pool.get()
+                        continue
+                    bs_content = BeautifulSoup(res.content, "lxml")
+                    component_tags = bs_content.find(name="table", id="sProdList").tbody.find_all(name="tr")
+                    break
+                except Exception as e:
+                    count += 1
+                    print(sys._getframe().f_code.co_name, e)
+                    self.proxy_ip = self.proxy_pool.get()
+                    if count > 10:
+                        print(category_tree, page_url)
+                        component_tags = []
+                        break
+
+                    if count > 100:
+                        self.proxy_pool._refresh()
+
+            for component_tag in component_tags:
+                detail_table = component_tag.find(name="table", attrs={"class": "TFtable"})
+                td_tags = component_tag.find_all(name="td")
+                try:
+                    component_code = td_tags[1].text.strip()
+                except Exception as e:
+                    print("component code is None", e)
+                    continue
+                try:
+                    component_img = td_tags[1].find(name="img", attrs={"class": "productThumbnail"}).get("src")
+                except:
+                    component_img = ""
+                try:
+                    rough_attach = td_tags[2].find(name="a", text="数据表")
+                    if not rough_attach:
+                        rough_attach = td_tags[2].find(name="a", attrs={"class": "prodDetailsAttachment"})
+                    component_attach = rough_attach.get("href")
+                    if "http" not in component_attach:
+                        component_attach = ""
+                except Exception as e:
+                    component_attach = ""
+                try:
+                    manufacture_description = td_tags[3].a.find_all(name="p")
+                    component_brand = manufacture_description[0].text.strip()
+                    component_description = manufacture_description[1].text.strip()
+                except Exception as e:
+                    component_brand = ""
+                    print(sys._getframe().f_code.co_name, e)
+                    continue
+                if not component_img and not component_attach and not component_brand:
+                    continue
+
+
+                component = (
+                    component_code, component_brand, first_category_name, second_category_name, page_url,
+                    component_attach,
+                    component_img)
+                count = 0
+                while True:
+                    try:
+                        orcl_conn = OracleSave(1000003)
+                        orcl_conn.component_insert(component)
+                        if detail_table:
+                            property_tags = detail_table.find_all(name="tr")
+                            for property_tag in property_tags:
+                                detail_td_tags = property_tag.find_all("td")
+                                property_name = detail_td_tags[0].text.strip()
+                                property_value = detail_td_tags[1].text.strip()
+                                key_value = (property_name, property_value)
+                                orcl_conn.properties_insert(key_value)
+                        orcl_conn.commit()
+                        orcl_conn.conn.close()
+
+                        break
+                    except Exception as e:
+                        print(e)
+                        count += 1
+                        # if count > 3:
+                        #     break
+        extra_threading = ThreadingPool(8)
+        extra_threading.multi_process(extra_thread, page_range)
+
     def read_from_csv(self):
         csv_categories = []
         with open("..\\Newark_test.csv", "r", encoding="utf-8") as f:
@@ -228,9 +335,9 @@ if __name__ == "__main__":
     # multi_category_trees = fp_newark.get_category_trees(initial_category_trees)
     # print(multi_category_trees)
     # fp_newark.csv_write(multi_category_trees)
-    multi_category_trees = fp_newark.read_from_csv()
-    threadingpool = ThreadingPool(8)
-    threadingpool.multi_process(fp_newark.thread_go, multi_category_trees)
-    # for category_tree in multi_category_trees:
-    #     fp_newark.thread_go(category_tree)
+    multi_category_trees = fp_newark.read_from_csv()[321:322]
+    # threadingpool = ThreadingPool(8)
+    # threadingpool.multi_process(fp_newark.thread_go, multi_category_trees)
+    for category_tree in multi_category_trees:
+        fp_newark.thread_go(category_tree)
 

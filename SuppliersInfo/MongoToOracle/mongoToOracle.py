@@ -12,24 +12,29 @@ from Lib.Currency.ThreadingPool import ThreadingPool
 from Lib.DBConnection.Constant import Manage_Oracle_Url
 
 
+def dec_str(func):
+    def wrapper(self, str_list):
+        modify_str_list = []
+        for single_str in str_list:
+            modify_str = str(single_str).strip("/!#$.=-〓＊").replace("None", "").replace("\ue29b", "").replace("\ue29c", "")
+            modify_str_list.append(modify_str)
+        return func(self, modify_str_list)
+
+    return wrapper
+
+
 class MongoToOracle:
     def __init__(self):
         pass
 
-    def get_mongo_data(self):
-        conn = MongoClient("10.10.101.22", 27017)
-        col = conn.spider.All_Company_Info
-        datas = col.find({"入库": None, "状态": "已完成"})
-        conn.close()
-        return datas
-
+    @dec_str
     def oracle_save(self, company):
         while True:
             try:
                 conn = cx_Oracle.connect(Manage_Oracle_Url)
                 cursor = conn.cursor()
-                company_id = cursor.execute("select AC$US$DETAIL_COPY_SEQ.nextval from dual").fetchone()[0]
-                sql_sentence = "insert into ac$us$detail_copy(id, name, businessCode, address, corporation, tel, type, industry, " \
+                company_id = cursor.execute("select AC$US$DETAIL_SEQ.nextval from dual").fetchone()[0]
+                sql_sentence = "insert into ac$us$detail(id, name, businessCode, address, corporation, tel, type, industry, " \
                                "adminName, adminTel, adminEmail, orgCode, email, fromTime, toTime, regStatus, approvedTime, " \
                                "estiblishTime, regCapital, businessScope, regInstitute, spider) values ({},'{}','{}','{}','{}','{}'," \
                                "'{}','{}','{}','{}','{}','{}','{}'," \
@@ -130,7 +135,7 @@ class MongoToOracle:
         modify_company = []
         for company_property in company:
             try:
-                modify_property = company_property.replace("'", '"')
+                modify_property = str(company_property).replace("'", '"').replace("\u3000", "").replace("\xa0", "").replace("�", "")
             except:
                 modify_property = company_property
             modify_company.append(modify_property)
@@ -146,21 +151,30 @@ class MongoToOracle:
                 print(e)
         return
 
-
+    def get_mongo_data(self):
+        conn = MongoClient("10.10.101.22", 27017)
+        col = conn.spider.All_Company_Info
+        datas = col.find({"入库": None, "状态": "已完成"})
+        conn.close()
+        return datas
 if __name__ == "__main__":
     import os
+
     os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
     while True:
         try:
             mongo_to_oracle = MongoToOracle()
-            datas = mongo_to_oracle.get_mongo_data()
-
+            conn = MongoClient("10.10.101.22", 27017)
+            col = conn.spider.All_Company_Info
+            """
+                Hayley Westenra
+            """
             # threadingpool = ThreadingPool(4)
-            # threadingpool.multi_process(mongo_to_oracle.data_to_oracle, datas)
+            # threadingpool.multi_thread(mongo_to_oracle.data_to_oracle, col.find({"入库": None, "状态": "已完成"}))
 
-            for data in datas:
+            for data in col.find({"入库": None, "状态": "已完成"}):
                 mongo_to_oracle.data_to_oracle(data)
+            conn.close()
             break
         except:
             continue
-

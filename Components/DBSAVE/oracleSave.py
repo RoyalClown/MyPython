@@ -5,7 +5,7 @@ def deco_quotation_marks(func):
     def wrapper(self, str_list):
         modify_str_list = []
         for single_str in str_list:
-            modify_str = single_str.replace("'", '"')
+            modify_str = single_str.replace("'", '"').strip("/!#$.=-〓＊").replace("None", "")
             modify_str_list.append(modify_str)
         return func(self, modify_str_list)
 
