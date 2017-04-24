@@ -122,7 +122,7 @@ class MongoToOracle:
                 try:
                     mongo_conn = MongoClient("10.10.101.22", 27017)
                     col = mongo_conn.spider.All_Company_Info
-                    col.update({"url": url}, {'$set': {"入库": "数据错误"}})
+                    col.update_many({"url": url}, {'$set': {"入库": "数据错误"}})
                     mongo_conn.close()
                     return
                 except Exception as e:
@@ -144,7 +144,7 @@ class MongoToOracle:
             try:
                 mongo_conn = MongoClient("10.10.101.22", 27017)
                 col = mongo_conn.spider.All_Company_Info
-                col.update({"url": url}, {'$set': {"入库": "已完成"}})
+                col.update_many({"url": url}, {'$set': {"入库": "已完成"}})
                 mongo_conn.close()
                 break
             except Exception as e:

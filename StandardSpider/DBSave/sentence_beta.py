@@ -12,7 +12,7 @@ def get_component2():
     conn = cx_Oracle.connect(B2B_Oracle_Url)
     cursor = conn.cursor()
     cursor.execute(
-        "select /*+ first_rows */  cc_code, cc_b2c_brid, cc_b2c_kiid from product$component_crawl abc where cc_task = '9999999' and cc_b2c_brid is not null and cc_b2c_kiid is not null and cc_uuid is null and not exists (select 1 from product$component where abc.cc_code=cmp_code and abc.cc_b2c_brid=cmp_brid) and rownum < 10000")
+        "select /*+ first_rows */  cc_code, cc_b2c_brid, cc_b2c_kiid from product$component_crawl abc where cc_task = '1000003' and cc_b2c_brid is not null and cc_b2c_kiid is not null and not exists (select 1 from product$component where abc.cc_code=cmp_code and abc.cc_b2c_brid=cmp_brid) and rownum < 10000")
     i = 0
     rows = cursor.fetchall()
     cursor.close()
@@ -46,7 +46,7 @@ def thread_go(ls_return):
 
 
 # 更新爬虫表的uuid
-def update_crawl_uuid(conn, uuid, code, taskid=9999999):
+def update_crawl_uuid(conn, uuid, code, taskid=1000003):
     cursor = conn.cursor()
     cursor.execute(
         "update product$component_crawl set cc_uuid='{}' where cc_task={} and cc_code='{}'".format(
@@ -136,7 +136,7 @@ if __name__ == "__main__":
         rows = get_component2()
         if len(rows) > 19:
             ls_return = div_list(rows, 20)
-            threadingpool = ThreadingPool(50)
+            threadingpool = ThreadingPool(4)
             threadingpool.multi_process(thread_go, ls_return)
         else:
             thread_go(rows)

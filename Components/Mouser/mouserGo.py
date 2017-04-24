@@ -394,16 +394,15 @@ if __name__ == "__main__":
     mouser_go = MouserGo()
     # multi_category_structures = mouser_go.get_all_category()
     # mouser_go.category_to_csv(multi_category_structures)
-    multi_category_trees = mouser_go.read_from_csv()[196:202]
-    pages_category = mouser_go.get_page_url(multi_category_trees)
-    print(pages_category)
+    init_multi_category_trees = mouser_go.read_from_csv()
+
+    # multi_category_trees = init_multi_category_trees[270:271]
+    for i in range(271, 986, 5):
+        multi_category_trees = init_multi_category_trees[i: i+5]
+
+        pages_category = mouser_go.get_page_url(multi_category_trees)
+    # print(pages_category)
     # for page_category in pages_category:
     #     mouser_go.page_thread_go(page_category)
-    threadingpool = ThreadingPool(8)
-    threadingpool.multi_process(mouser_go.page_thread_go, pages_category)
-
-    # threadingpool = ThreadingPool(10)
-    # threadingpool = ThreadingPool(10)
-    # threadingpool.multi_process(mouser_go.thread_go, multi_category_trees)
-    # for category_tree in multi_category_trees:
-    #     mouser_go.thread_go(category_tree)
+        threadingpool = ThreadingPool(16)
+        threadingpool.multi_process(mouser_go.page_thread_go, pages_category)
