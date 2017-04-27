@@ -43,9 +43,16 @@ class FileSystem:
     def file_upload(self, local_file_path):
         if not local_file_path:
             return
-        with open(local_file_path, "rb") as f:
-            res = requests.post(File_Server_Url, files={'file': f})
-            res_j = res.json()
+        while True:
+            try:
+                with open(local_file_path, "rb") as f:
+                    res = requests.post(File_Server_Url, files={'file': f})
+                    if res.status_code == 200:
+
+                        res_j = res.json()
+                        break
+            except Exception as e:
+                print(sys._getframe().f_code.co_name)
         server_file_path = res_j["path"]
         print("File Server Upload Success !!")
         return server_file_path

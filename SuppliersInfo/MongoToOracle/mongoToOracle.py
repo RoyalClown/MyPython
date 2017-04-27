@@ -14,9 +14,13 @@ from Lib.DBConnection.Constant import Manage_Oracle_Url
 
 def dec_str(func):
     def wrapper(self, str_list):
+        special_characters = "��_!#$.=-〓*＊\"'<>《》,.\\，。\ue29c\ue29b\ue2f1\ue006\u3000\ue000\ue020★"
         modify_str_list = []
         for single_str in str_list:
-            modify_str = str(single_str).strip("/!#$.=-〓＊").replace("None", "").replace("\ue29b", "").replace("\ue29c", "")
+            for special_character in special_characters:
+                single_str = single_str.replace(special_character, "")
+
+            modify_str = single_str.replace("None", "").replace("null", "").strip()
             modify_str_list.append(modify_str)
         return func(self, modify_str_list)
 
@@ -56,6 +60,16 @@ class MongoToOracle:
     def data_to_oracle(self, data):
         url = data["url"]
         data = data["data"]
+        if data == 'too fast':
+            while True:
+                try:
+                    mongo_conn = MongoClient("10.10.101.22", 27017)
+                    col = mongo_conn.spider.All_Company_Info
+                    col.update_many({"url": url}, {'$set': {"入库": "数据错误"}})
+                    mongo_conn.close()
+                    return
+                except Exception as e:
+                    print(sys._getframe().f_code.co_name, e)
 
         base_info = data.get("baseInfo")
         if base_info:

@@ -37,8 +37,7 @@ class BrandLogo:
     def brand_logo_go(self):
         def thread_go(brand_logo_url):
             br_id, logo_url = brand_logo_url
-            if logo_url == "http://www.lyontek.com/images/lyonteklogo.gif":
-                return
+
             # if "https" in logo_url:
             #     return
             server_file_url = file_system.download_upload(logo_url, ".png")

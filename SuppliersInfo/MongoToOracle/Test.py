@@ -9,9 +9,14 @@ import time
 
 def dec_str(func):
     def wrapper(self, str_list):
+        special_characters = "!#$.=-〓*＊\"'<>《》,.\\，。\ue29c\ue29b\ue2f1\ue006★"
         modify_str_list = []
         for single_str in str_list:
-            modify_str = single_str.strip("\/!#$.=-").replace("None", "")
+            for special_character in special_characters:
+                print(special_character)
+                single_str = single_str.replace(special_character, "")
+
+            modify_str = single_str.replace("None", "").strip()
             modify_str_list.append(modify_str)
         return func(self, modify_str_list)
 
@@ -23,4 +28,4 @@ class A:
 
 if __name__ == "__main__":
     a = A()
-    a.func_a(["a/", "b\\1", "c$$", "d.=2", "#.e!"])
+    a.func_a(["/!#$.=-〓*＊\"'<>《》,5.\\，None/!#$.=-〓*1＊\"'<>3《》,.\\，\ue29c。\ue29b  \ue2f1"])

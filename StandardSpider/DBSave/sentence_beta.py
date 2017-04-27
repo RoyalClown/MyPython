@@ -98,9 +98,9 @@ def save_to_component(conn, code, kiid, brid, cmp_uuid, version=1):
     cursor.execute("select product$component_seq.nextval from dual")
     component_id = cursor.fetchone()[0]
     try:
-        cursor.execute(
-            "insert into product$component(cmp_id, cmp_code,cmp_unit,cmp_version,cmp_kiid,cmp_brid,cmp_uuid,cmp_createtime,cmp_modifytime) values({},'{}','PCS',{},{},{},'{}',to_timestamp('{}','YYYY-MM-DD HH24:MI:SS'),to_timestamp('{}','YYYY-MM-DD HH24:MI:SS'))".format(
-                component_id, code, version, kiid, brid, cmp_uuid, define_time, modify_time))
+        sql = "insert into product$component(cmp_id, cmp_code,cmp_unit,cmp_version,cmp_kiid,cmp_brid,cmp_uuid,cmp_createtime,cmp_modifytime) values({},'{}','PCS',{},{},{},'{}',to_timestamp('{}','YYYY-MM-DD HH24:MI:SS'),to_timestamp('{}','YYYY-MM-DD HH24:MI:SS'))".format(
+                component_id, code, version, kiid, brid, cmp_uuid, define_time, modify_time)
+        cursor.execute(sql)
     except Exception as e:
         print(e)
         return None
@@ -134,15 +134,18 @@ def div_list(ls, n):
 if __name__ == "__main__":
     while True:
         rows = get_component2()
-        if len(rows) > 19:
-            ls_return = div_list(rows, 20)
-            threadingpool = ThreadingPool(4)
-            threadingpool.multi_process(thread_go, ls_return)
-        else:
-            thread_go(rows)
+        try:
+            if len(rows) > 19:
+                ls_return = div_list(rows, 20)
+                threadingpool = ThreadingPool(4)
+                threadingpool.multi_process(thread_go, ls_return)
+            else:
+                thread_go(rows)
+        except Exception as e:
+            print(e)
         if len(rows) == 0:
             break
-        # for ls_ret in ls_return:
-        #     thread_go(ls_ret)
+            # for ls_ret in ls_return:
+            #     thread_go(ls_ret)
 
 
