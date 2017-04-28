@@ -14,7 +14,7 @@ from Lib.DBConnection.Constant import Manage_Oracle_Url
 
 def dec_str(func):
     def wrapper(self, str_list):
-        special_characters = "��_!#$.=-〓*＊\"'<>《》,.\\，。\ue29c\ue29b\ue2f1\ue006\u3000\ue000\ue020★"
+        special_characters = "“”�ɽʯ�_!#$.=-〓*＊\"'<>《》,.\\，。\ue29c\ue29b\ue2f1\ue006\u3000\ue000\ue020\ue236★"
         modify_str_list = []
         for single_str in str_list:
             for special_character in special_characters:
@@ -38,9 +38,9 @@ class MongoToOracle:
                 conn = cx_Oracle.connect(Manage_Oracle_Url)
                 cursor = conn.cursor()
                 company_id = cursor.execute("select AC$US$DETAIL_SEQ.nextval from dual").fetchone()[0]
-                sql_sentence = "insert into ac$us$detail(id, name, businessCode, address, corporation, tel, type, industry, " \
+                sql_sentence = "insert into ac$us$detail(modifystatus,id, name, businessCode, address, corporation, tel, type, industry, " \
                                "adminName, adminTel, adminEmail, orgCode, email, fromTime, toTime, regStatus, approvedTime, " \
-                               "estiblishTime, regCapital, businessScope, regInstitute, spider) values ({},'{}','{}','{}','{}','{}'," \
+                               "estiblishTime, regCapital, businessScope, regInstitute, spider) values ('0',{},'{}','{}','{}','{}','{}'," \
                                "'{}','{}','{}','{}','{}','{}','{}'," \
                                "to_timestamp(TO_CHAR({} / (1000 * 60 * 60 * 24) + TO_DATE('1970-01-01 08:00:00', 'YYYY-MM-DD HH:MI:SS'), 'YYYY-MM-DD HH:MI:SS'),'YYYY-MM-DD HH24:MI:SS')," \
                                "to_timestamp(TO_CHAR({} / (1000 * 60 * 60 * 24) + TO_DATE('1970-01-01 08:00:00', 'YYYY-MM-DD HH:MI:SS'), 'YYYY-MM-DD HH:MI:SS'),'YYYY-MM-DD HH24:MI:SS')," \

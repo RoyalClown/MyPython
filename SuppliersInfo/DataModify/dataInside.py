@@ -4,6 +4,7 @@
     @date:          2017/4/24
 """
 import cx_Oracle
+import sys
 
 from Lib.Currency.ThreadingPool import ThreadingPool
 from Lib.DBConnection.Constant import Manage_Oracle_Url
@@ -74,12 +75,16 @@ class DataInside:
 
 if __name__ == "__main__":
     while True:
-        data_inside = DataInside()
-        rows = data_inside.get_data()
-        if not rows:
-            break
-        # for row in rows:
-        #     data_inside.modify_data(row)
+        try:
+            data_inside = DataInside()
+            rows = data_inside.get_data()
+            if not rows:
+                break
+            # for row in rows:
+            #     data_inside.modify_data(row)
 
-        threadingpool = ThreadingPool(8)
-        threadingpool.multi_process(data_inside.modify_data, rows)
+            threadingpool = ThreadingPool(8)
+            threadingpool.multi_process(data_inside.modify_data, rows)
+
+        except Exception as e:
+            print(sys._getframe().f_code.co_name)
