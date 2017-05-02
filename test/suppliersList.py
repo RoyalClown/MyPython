@@ -1,6 +1,12 @@
+"""
+    @description:   
+    @author:        RoyalClown
+    @date:          2017/4/28
+"""
 import re
 
-from Lib.NetCrawl.HtmlAnalyse import HtmlAnalyse
+import requests
+from bs4 import BeautifulSoup
 
 
 class SuppliersList:
@@ -9,14 +15,15 @@ class SuppliersList:
 
     def get_pages_urls(self):
         urls = []
-        for i in range(1, 32):
+        for i in range(1, 3):
             url = "http://book.youboy.com/sz/dianzi/#page=" + str(i)
             urls.append(url)
         return urls
 
     def get_supplier_urls(self, url):
-        html_analyse = HtmlAnalyse(url)
-        bs_content = html_analyse.get_bs_contents()
+        res = requests.get(url)
+        content = res.content
+        bs_content = BeautifulSoup(content, "lxml")
         ul_tags = bs_content.find_all(name="ul", attrs={"class": "sheng_weizhi_lb"})
         urls = []
         for ul_tag in ul_tags:
@@ -25,8 +32,9 @@ class SuppliersList:
         return urls
 
     def get_supplier(self, url):
-        html_analyse = HtmlAnalyse(url)
-        bs_content = html_analyse.get_bs_contents()
+        res = requests.get(url)
+        content = res.content
+        bs_content = BeautifulSoup(content, "lxml")
         ul_tag = bs_content.find(name="ul", attrs={"class": "txl_content_con_L"})
         supplier_name = ul_tag.h1.text.strip()
 
@@ -48,12 +56,11 @@ if __name__ == "__main__":
         urls = supplierlist.get_supplier_urls(pages_url)
 
 
-
         for url in urls:
             line = supplierlist.get_supplier(url)
             lines.append(line)
 
-    with open("I:\PythonPrj\StandardSpider\OtherWork\ShenZhenSupplier\Category.csv", 'w', encoding='utf-8') as f:
+    with open("..\\test\Category.csv", 'w', encoding='utf-8') as f:
         for list_line in lines:
             line = (",".join(list_line)) + "\n"
             f.write(line.encode().decode())
