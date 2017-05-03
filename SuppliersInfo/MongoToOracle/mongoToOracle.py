@@ -14,7 +14,7 @@ from Lib.DBConnection.Constant import Manage_Oracle_Url
 
 def dec_str(func):
     def wrapper(self, str_list):
-        special_characters = "“”�ɽʯ�_!#$.=-〓*＊\"'<>《》,.\\，。\ue29c\ue29b\ue2f1\ue006\u3000\ue000\ue020\ue236\ue235★"
+        special_characters = "“”�ɽʯ�_!#$.=-〓*＊\"'<>《》,.\\，。\ue29c\ue29b\ue2f1\ue006\u3000\ue000\ue020\ue236\ue235\ue234★"
         modify_str_list = []
         for single_str in str_list:
             for special_character in special_characters:
