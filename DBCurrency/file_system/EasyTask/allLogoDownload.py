@@ -1,8 +1,9 @@
 """
-    @description:   下载企业logo图片返回本地地址存入数据库
+    @description:   
     @author:        RoyalClown
-    @date:          2017/2/24
+    @date:          2017/5/4
 """
+
 import cx_Oracle
 
 from DBCurrency.file_system.fileSystem import FileSystem
@@ -17,7 +18,7 @@ class BrandLogo:
     def get_download_urls(self):
         oracle_conn = cx_Oracle.connect(B2B_Oracle_Url)
         cursor = oracle_conn.cursor()
-        sql_sentence = "select br_id, br_logourl from product$brand_import where br_logourl is not null and br_logourl_c is null"
+        sql_sentence = "select distinct br_logourl,br_name_en from product$brand where br_logourl is not null order by br_name_en"
         cursor.execute(sql_sentence)
         brand_logo_urls = cursor.fetchall()
         cursor.close()
@@ -36,13 +37,11 @@ class BrandLogo:
 
     def brand_logo_go(self):
         def thread_go(brand_logo_url):
-            br_id, logo_url = brand_logo_url
+            logo_url, br_name = brand_logo_url
 
-            if "smhttp" in logo_url:
-                return
-            server_file_url = file_system.download_upload(logo_url, ".png")
-            if server_file_url:
-                self.update_local_url(server_file_url, br_id)
+            # if "https" in logo_url:
+            #     return
+            server_file_url = file_system.file_download(logo_url, ".png", file_name=br_name.replace("/", ""))
 
         brand_logo_urls = self.get_download_urls()
         file_system = FileSystem()

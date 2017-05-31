@@ -19,25 +19,33 @@ class FileSystem:
         self.proxy_pool = ProxyPool()
         self.proxy_ip = self.proxy_pool.get()
 
-    def file_download(self, url, file_type):
+    def file_download(self, url, file_type, file_name=str(random.random())):
         download_dir_path = "..\\download_files\\"
         if not os.path.exists(download_dir_path):
             os.mkdir(download_dir_path)
-        download_file_path = download_dir_path + str(random.random()) + file_type
+        download_file_path = download_dir_path + file_name + file_type
+        if os.path.exists(download_file_path):
+            return
         try_count = 0
         while True:
             try:
-                html_analyse = HtmlAnalyse(url, proxy=self.proxy_ip)
+                download_file_path = download_dir_path + str(random.random()) + file_type
+                # html_analyse = HtmlAnalyse(url, proxy=self.proxy_ip)
+                html_analyse = HtmlAnalyse(url)
                 html_analyse.download(download_file_path)
                 print("File Download Success !!")
                 break
             except Exception as e:
-                print(sys._getframe().f_code.co_name, e)
+                print(sys._getframe().f_code.co_name, url, e)
                 try_count += 1
                 if try_count > 2 and "https" in url:
                     return
+                if try_count > 5:
+                    return
                 self.proxy_pool.remove(self.proxy_ip)
                 self.proxy_ip = self.proxy_pool.get()
+                # download_file_path = download_dir_path + str(random.random()) + file_type
+
         return download_file_path
 
     def file_upload(self, local_file_path):
@@ -52,7 +60,7 @@ class FileSystem:
                         res_j = res.json()
                         break
             except Exception as e:
-                print(sys._getframe().f_code.co_name)
+                print(sys._getframe().f_code.co_name, e)
         server_file_path = res_j["path"]
         print("File Server Upload Success !!")
         return server_file_path

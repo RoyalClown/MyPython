@@ -26,8 +26,6 @@ class ImgDownload:
         # 去除与之前爬取img重复的
 
         cursor.execute("update product$component set cmp_img=null where cmp_img='None'")
-        cursor.execute(
-            "merge into product$component_crawl a using ( select cc_b2c_img,cc_img from product$component_crawl where cc_b2c_img is not null group by cc_b2c_img,cc_img ) b on (a.cc_img = b.cc_img ) when matched then update set a.cc_b2c_img = b.cc_b2c_img where a.cc_b2c_img is null")
         cursor.execute("select distinct cc_img from product$component_crawl where cc_b2c_img is null and cc_img is not null and cc_task=(select cct_id from product$component_crawl_task where cct_taskid='{}')".format(self.task_code))
         img_datas = cursor.fetchall()
         cursor.close()

@@ -77,8 +77,9 @@ class HtmlAnalyse:
     # 下载文件
     def download(self, path):
         res = self._session.get(self.url, stream=True, timeout=30, verify=False)
-        if not res.content:
-            self.download(path)
+        if not res.content or res.status_code != 200:
+            raise EOFError
+
         with open(path, 'wb') as f:
             f.write(res.content)
 
